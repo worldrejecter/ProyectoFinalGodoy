@@ -1,80 +1,75 @@
 
+//Codigo
 
-/*function convertirCelsiusAFahrenheit(celsius) {
-    return (celsius * 9/5) + 32;
-}
+let calcular = document.getElementById("btnCalcular");
+let alto = document.getElementById("txtAlto");
+let ancho = document.getElementById("txtAncho");
+let largo = document.getElementById("txtLargo");
+let peso = document.getElementById("txtPeso");
+let resultado = document.getElementById("resultado");
 
+let historial = document.getElementById("historial") // Div para guardar el historial de precios 
 
-console.log(convertirCelsiusAFahrenheit(35)); 
+let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
 
+verHistorial();
 
-function contarVocales(texto) {
-    let coincidencias = texto.match(/[aeiouAEIOUáéíóúÁÉÍÓÚ]/g);
-    return coincidencias ? coincidencias.length : 0;
-}
+calcular.onclick = () => {
 
-console.log(contarVocales("Furina de Fontaine"));*/
-
-
-// Función 1: Calcula la cuota mensual del crédito
-function calcularCuotaMensual(monto, tasaInteresAnual, plazoMeses) {
-    let tasaInteresMensual = (tasaInteresAnual / 100) / 12;
-    return monto * (tasaInteresMensual * Math.pow(1 + tasaInteresMensual, plazoMeses)) / 
-           (Math.pow(1 + tasaInteresMensual, plazoMeses) - 1);
-}
-
-// Función 2: Genera el cronograma de pagos mensuales
-function generarCronograma(monto, tasaInteresAnual, plazoMeses, cuotaMensual) {
-    let tasaInteresMensual = (tasaInteresAnual / 100) / 12;
-    let saldoPendiente = monto;
-    let totalInteresPagado = 0;
-
-    console.log("\n📌 Cronograma de pagos:");
-    console.log("Mes | Cuota | Interés | Capital | Saldo Restante");
-    console.log("------------------------------------------------");
-
-    for (let mes = 1; mes <= plazoMeses; mes++) {
-        let interesMensual = saldoPendiente * tasaInteresMensual;
-        let capitalPagado = cuotaMensual - interesMensual;
-        saldoPendiente -= capitalPagado;
-        totalInteresPagado += interesMensual;
-
-        console.log(`${mes} | $${cuotaMensual.toFixed(2)} | $${interesMensual.toFixed(2)} | $${capitalPagado.toFixed(2)} | $${saldoPendiente.toFixed(2)}`);
+    if(!validarisNaN()){
+        return;
     }
 
-    console.log("\n📊 Resumen:");
-    console.log(`💰 Cuota mensual fija: $${cuotaMensual.toFixed(2)}`);
-    console.log(`📉 Total de intereses pagados: $${totalInteresPagado.toFixed(2)}`);
-    console.log(`💳 Total a pagar al final del crédito: $${(cuotaMensual * plazoMeses).toFixed(2)}`);
-}
+    let total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
 
-// Función 3: Controla el flujo del simulador y permite repetir el cálculo
-function simuladorCredito() {
-    let continuar = true;
+    let precio;
 
-    while (continuar) {
-        let monto = parseFloat(prompt("Ingrese el monto del préstamo: "));
-        let tasaInteresAnual = parseFloat(prompt("Ingrese la tasa de interés anual (%): "));
-        let plazoMeses = parseInt(prompt("Ingrese el plazo en meses: "));
-
-        if (isNaN(monto) || isNaN(tasaInteresAnual) || isNaN(plazoMeses) || monto <= 0 || tasaInteresAnual < 0 || plazoMeses <= 0) {
-            console.log("❌ Error: Ingrese valores numéricos válidos.");
-            continue;
-        }
-
-        let cuotaMensual = calcularCuotaMensual(monto, tasaInteresAnual, plazoMeses);
-        generarCronograma(monto, tasaInteresAnual, plazoMeses, cuotaMensual);
-
-        continuar = confirm("¿Desea calcular otro crédito?");
+    if(total<=20){
+        precio = 10000;
+    } else if (total >= 21 && total <= 30) {
+        precio = 20000;
+    } else if (total >= 31 && total <= 40) {
+        precio = 30000;
+    } else {
+        precio = 40000;
     }
 
-    console.log("✅ Gracias por usar el simulador de crédito.");
+    historialPrecios.push(precio);
+    localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
+
+    resultado.innerHTML = `El valor de su envío sería: $${precio}`;
+
+    verHistorial();
+
+    limpiarCampos();
 }
 
-// Ejecutar el simulador
-simuladorCredito();
+function limpiarCampos() {
+    alto.value = "";
+    ancho.value = "";
+    largo.value = "";
+    peso.value = "";
+}
 
+function verHistorial () {
+    historial.innerHTML = "<h2>Historial de calculos</h2>"
 
+    historialPrecios.forEach((precio, index)=>{
+        historial.innerHTML += `<p> ${index+1}. precio $${precio}</p>`;
+    })
+}
+
+function validarisNaN() {
+
+    let total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
+
+    if (isNaN(total)){
+        resultado.innerHTML = "Ingrese solo números en todos los campos"
+        return false;
+    }
+
+    return true;
+}
 
 
 
