@@ -1,10 +1,14 @@
 // Botones
-let seleccionarDireccion = document.getElementById("btnSeleccionarDireccion");
+//let seleccionarDireccion = document.getElementById("btnSeleccionarDireccion");
 let calcular = document.getElementById("btnCalcular");
 let borrarHistorial = document.getElementById("btnBorrarHistorial");
+//let btnSeleccionarDestino = document.getElementById("btnSeleccionarDestino");
+
+let btnConfirmarDireccionDestino = document.getElementById("btnConfirmarDireccionDestino");
 
 // Campos de entrada
 let direccion = document.getElementById("txtDireccion");
+let destino = document.getElementById("txtDestino");
 let alto = document.getElementById("txtAlto");
 let ancho = document.getElementById("txtAncho");
 let largo = document.getElementById("txtLargo");
@@ -40,16 +44,18 @@ const empresasDisponibles = [
 ];
 
 // Evento para seleccionar dirección
-seleccionarDireccion.onclick = () => {
-    if (direccion.value.trim() === "") {
-        resultado.innerHTML = "⚠️ Por favor, ingrese una dirección.";
+// Evento para confirmar dirección y destino
+btnConfirmarDireccionDestino.onclick = () => {
+    if (direccion.value.trim() === "" || destino.value.trim() === "") {
+        resultado.innerHTML = "⚠️ Por favor, ingrese tanto la dirección como el destino.";
         return;
     }
 
     // Habilitar los campos de medidas
     medidasContainer.disabled = false;
-    resultado.innerHTML = "✅ Dirección seleccionada. Ahora ingrese las medidas.";
+    resultado.innerHTML = "✅ Dirección y destino confirmados. Ahora ingrese las medidas.";
 };
+
 
 // Evento para habilitar el botón de calcular cuando se ingresan todas las medidas
 [alto, ancho, largo, peso].forEach(input => {
@@ -80,10 +86,10 @@ calcular.onclick = () => {
     empresaEnvio.disabled = false;
 
     // Guardar en el historial
-    historialPrecios.push({ empresa, precio, direccion: direccion.value.trim() });
+    historialPrecios.push({ empresa, precio, direccion: direccion.value.trim(), destino: destino.value.trim() });
     localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
 
-    resultado.innerHTML = `🚀 Se recomienda: <b>${empresa}</b>. <br>💰 Precio estimado: <b>$${precio}</b>`;
+    resultado.innerHTML = `🚀 Se recomienda: <b>${empresa}</b>. <br>💰 Precio estimado: <b>$${precio}</b> <br>📍 <b>Dirección:</b> ${direccion.value.trim()} <br>🌍 <b>Destino:</b> ${destino.value.trim()}`;
 
     verHistorial();
     limpiarCampos();
@@ -96,6 +102,33 @@ function limpiarCampos() {
 }
 
 // Mostrar historial de envíos
+
+
+
+function borrarItemHistorial(index) {
+    // Eliminar el item del array
+    historialPrecios.splice(index, 1);
+
+    // Actualizar el historial en el localStorage
+    localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
+
+    // Volver a mostrar el historial actualizado
+    verHistorial();
+}
+
+
+// Validar que los valores sean numéricos
+function validarisNaN() {
+    let valores = [alto.value, ancho.value, largo.value, peso.value];
+    for (let val of valores) {
+        if (isNaN(val) || val.trim() === "" || parseFloat(val) < 0) {
+            resultado.innerHTML = "⚠️ Ingrese solo números positivos en los campos de medidas.";
+            return false;
+        }
+    }
+    return true;
+}
+
 function verHistorial() {
     if (historialPrecios.length === 0) {
         historialContainer.style.display = "none";
@@ -105,16 +138,16 @@ function verHistorial() {
     historialContainer.style.display = "block";
     historial.innerHTML = "<h2>📦 Historial de cálculos</h2>";
 
-    historialPrecios.forEach((item, index) => {
+    historialPrecios.map((item, index) => {
         let div = document.createElement("div");
         div.classList.add("historial-item");
         div.innerHTML = `
             📍 <b>Dirección:</b> ${item.direccion} <br>
+            🌍 <b>Destino:</b> ${item.destino} <br>
             🚛 <b>Empresa:</b> ${item.empresa} <br>
             💰 <b>Precio:</b> $${item.precio} 
             <button class="eliminar-item" data-index="${index}">❌ Eliminar</button>
         `;
-
         historial.appendChild(div);
     });
 
@@ -127,17 +160,6 @@ function verHistorial() {
     });
 }
 
-// Validar que los valores sean numéricos
-function validarisNaN() {
-    let valores = [alto.value, ancho.value, largo.value, peso.value];
-    for (let val of valores) {
-        if (isNaN(val) || val.trim() === "") {
-            resultado.innerHTML = "⚠️ Ingrese solo números en los campos de medidas.";
-            return false;
-        }
-    }
-    return true;
-}
 
 // Botón para borrar historial
 borrarHistorial.onclick = () => {
