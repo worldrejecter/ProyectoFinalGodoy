@@ -74,7 +74,7 @@ function verHistorial () {
 
     historial.innerHTML = "<h2>Historial de calculos</h2>"
 
-    historialContainer.style.display = "flex";
+    historialContainer.style.display = "block";
 
     historialPrecios.forEach((precio, index)=>{
         historial.innerHTML += `<p> ${index+1}. Precio: $${precio}</p>`;
