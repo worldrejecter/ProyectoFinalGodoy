@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,32 +10,38 @@
 </head>
 <body>
 
-    <h1>Cotizador - Correos </h1>
+    <h1>Cotizador de Envíos</h1>
 
-    <h2>Cotice su paquete</h2>
+    <!-- SELECCIÓN DE DIRECCIÓN -->
+    <h2>Seleccione su dirección:</h2>
+    <input type="text" id="txtDireccion" placeholder="Ingrese su dirección">
+    <button id="btnSeleccionarDireccion">Confirmar Dirección</button>
 
-    <h3>Seleccione la empresa de envío:</h3>
-    <select id="empresaEnvio">
-    <option value="DHL">DHL</option>
-    <option value="FedEx">FedEx</option>
-    <option value="UPS">UPS</option>
-    <option value="USPS">USPS</option>
-    </select>
-    
-    <h3>Ingrese alto:</h3>
+    <!-- INGRESO DE MEDIDAS (DESHABILITADO HASTA SELECCIONAR DIRECCIÓN) -->
+    <fieldset id="medidas-container" disabled>
+        <h2>Ingrese las dimensiones del paquete:</h2>
+        <label>Alto:</label>
         <input type="text" id="txtAlto">
-    <h3>Ingrese ancho</h3>
+        <label>Ancho:</label>
         <input type="text" id="txtAncho">
-    <h3>Ingrese largo</h3> 
+        <label>Largo:</label>
         <input type="text" id="txtLargo">
-    <h3>Ingrese peso</h3> 
+        <label>Peso:</label>
         <input type="text" id="txtPeso">
+        <button id="btnCalcular" disabled>Calcular Envío</button>
+    </fieldset>
 
-    <button id="btnCalcular">Enviar</button>
+    <!-- RECOMENDACIÓN DE EMPRESA -->
+    <h2>Empresa recomendada:</h2>
+    <select id="empresaEnvio" disabled>
+        <option value="">Seleccione una empresa</option>
+    </select>
 
+    <!-- RESULTADO DEL CÁLCULO -->
     <h1 id="resultado"></h1>
 
-    <div id="historial-container">
+    <!-- HISTORIAL DE CÁLCULOS -->
+    <div id="historial-container" style="display:none;">
         <div id="historial"></div>
         <button id="btnBorrarHistorial">Borrar Historial</button>
     </div>
