@@ -30,6 +30,14 @@ let historialContainer = document.getElementById("historial-container");
 // Historial en localStorage
 let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
 
+//pago
+
+let modalPago = document.getElementById("modalPago");
+let btnPagar = document.getElementById("btnPagar");
+let closeModalPago = document.getElementById("closeModalPago");
+let formPago = document.getElementById("formPago");
+let mensajePago = document.getElementById("mensajePago");
+
 verHistorial();
 
 // Empresas de envío disponibles
@@ -239,16 +247,26 @@ function verHistorial() {
             📅 <b>Fecha:</b> ${item.fecha} <br>
             💰 <b>Precio:</b> $${item.precio} <br>
             <button class="eliminar-item" data-index="${index}">❌ Eliminar</button>
+            <button class="pagar-item" data-index="${index}">💳 Pagar</button>
         `;
 
         historial.appendChild(div);
     });
 
-    // Agregar evento a cada botón de eliminar
+    // eliminar
     document.querySelectorAll(".eliminar-item").forEach(boton => {
         boton.addEventListener("click", (e) => {
             let index = e.target.getAttribute("data-index");
             borrarItemHistorial(index);
+        });
+    });
+
+    //pagar
+
+    document.querySelectorAll(".pagar-item").forEach(boton => {
+        boton.addEventListener("click", (e) => {
+            let index = e.target.getAttribute("data-index");
+            abrirModalPago(index);
         });
     });
 }
@@ -270,3 +288,41 @@ borrarHistorial.onclick = () => {
     localStorage.removeItem("historialPrecios");
     verHistorial();
 };
+
+function abrirModalPago(index) {
+    // Obtener el historial de envíos
+    let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+    let item = historialPrecios[index];
+
+    // Rellenar el monto en el modal
+    document.getElementById("montoPago").value = item.precio;
+
+    // Mostrar el modal de pago
+    modalPago.style.display = "block";
+
+    // Cerrar el modal cuando se haga clic en la "X"
+    closeModalPago.onclick = () => {
+        modalPago.style.display = "none";
+    };
+
+    // Evitar que el modal se cierre al hacer clic dentro del contenedor
+    window.onclick = (event) => {
+        if (event.target === modalPago) {
+            modalPago.style.display = "none";
+        }
+    };
+
+    // Manejar el envío del formulario de pago
+    formPago.onsubmit = (e) => {
+        e.preventDefault();
+        realizarPago(item);
+    };
+}
+
+function realizarPago(item) {
+    // Aquí puedes agregar la lógica de pago, como redirigir a un servicio de pago
+    mensajePago.textContent = `¡Pago de $${item.precio} realizado exitosamente!`;
+    setTimeout(() => {
+        modalPago.style.display = "none";  // Cerrar el modal después de pagar
+    }, 2000);
+}
