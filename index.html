@@ -14,6 +14,7 @@
 
     <!-- SELECCIÓN DE DIRECCIÓN -->
     <h2>Seleccione su dirección:</h2>
+    <h3>Ej: (Calle 123, Madrid, España)</h3>
     <input type="text" id="txtDireccion" placeholder="Ingrese su dirección">
     <h2>Seleccione el destino:</h2>
     <input type="text" id="txtDestino" placeholder="Ingrese el destino">
@@ -33,11 +34,15 @@
         <button id="btnCalcular" disabled>Calcular Envío</button>
     </fieldset>
 
-    <!-- RECOMENDACIÓN DE EMPRESA -->
-    <h2>Empresa recomendada:</h2>
-    <select id="empresaEnvio" disabled>
+
+    <!-- Empresas recomendadas (oculto al principio) -->
+    <div id="empresasRecomendadas" style="display:none;">
+    <h2>Seleccione una empresa de envío:</h2>
+    <select id="seleccionarEmpresa" disabled>
         <option value="">Seleccione una empresa</option>
     </select>
+    <button id="btnConfirmarEnvio" disabled>Confirmar Envío</button>
+    </div>
 
     <!-- RESULTADO DEL CÁLCULO -->
     <h1 id="resultado"></h1>
@@ -47,6 +52,14 @@
         <div id="historial"></div>
         <button id="btnBorrarHistorial">Borrar Historial</button>
     </div>
+
+    <!-- Ventana de Confirmación de Envío -->
+    <div id="confirmacionEnvio" style="display:none;">
+    <h2>¡Envío Confirmado!</h2>
+    <p>El paquete ha sido registrado correctamente. El envío se está procesando.</p>
+    <button id="btnAceptarConfirmacion">Aceptar</button>
+    </div>
+
 
 </body>
 </html>

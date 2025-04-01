@@ -34,14 +34,20 @@ verHistorial();
 
 // Empresas de envío disponibles
 const empresasDisponibles = [
-    { nombre: "DHL", limite: 30, precio: 10000 },
-    { nombre: "FedEx", limite: 50, precio: 20000 },
-    { nombre: "UPS", limite: 70, precio: 30000 },
-    { nombre: "USPS", limite: 90, precio: 40000 },
-    { nombre: "Amazon Logistics", limite: 110, precio: 50000 },
-    { nombre: "BlueDart", limite: 150, precio: 60000 },
-    { nombre: "Estafeta", limite: 200, precio: 70000 }
+    { nombre: "DHL", limite: 20, precio: 12000 },
+    { nombre: "FedEx", limite: 40, precio: 22000 },
+    { nombre: "UPS", limite: 60, precio: 30000 },
+    { nombre: "USPS", limite: 80, precio: 38000 },
+    { nombre: "Amazon Logistics", limite: 100, precio: 48000 },
+    { nombre: "BlueDart", limite: 120, precio: 55000 },
+    { nombre: "Estafeta", limite: 150, precio: 65000 },
+    { nombre: "Ninja Van", limite: 175, precio: 72000 },
+    { nombre: "Crown Worldwide", limite: 200, precio: 80000 },
+    { nombre: "TNT Express", limite: 250, precio: 85000 },
+    { nombre: "XPO Logistics", limite: 300, precio: 90000 },
+    { nombre: "Yamato Transport", limite: 350, precio: 95000 }
 ];
+
 
 // Evento para seleccionar dirección
 // Evento para confirmar dirección y destino
@@ -76,32 +82,92 @@ calcular.onclick = () => {
 
     let total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
 
-    // Buscar la empresa de envío más adecuada
-    let empresaSeleccionada = empresasDisponibles.find(empresa => total <= empresa.limite);
-    let empresa = empresaSeleccionada ? empresaSeleccionada.nombre : "Transportista Especial";
-    let precio = empresaSeleccionada ? empresaSeleccionada.precio : 80000;
+    // Buscar las empresas recomendadas
+    let empresasRecomendadas = empresasDisponibles.filter(empresa => total <= empresa.limite);
 
-    // Mostrar empresa recomendada
-    empresaEnvio.innerHTML = `<option value="${empresa}">${empresa}</option>`;
-    empresaEnvio.disabled = false;
+    if (empresasRecomendadas.length === 0) {
+        resultado.innerHTML = "⚠️ No hay empresas disponibles para el tamaño del paquete.";
+        return;
+    }
+
+    // Mostrar las empresas recomendadas en el select
+    let selectEmpresa = document.getElementById("seleccionarEmpresa");
+    selectEmpresa.innerHTML = "<option value=''>Seleccione una empresa</option>"; // Limpiar opciones anteriores
+    empresasRecomendadas.forEach(empresa => {
+        let option = document.createElement("option");
+        option.value = empresa.nombre;
+        option.innerHTML = empresa.nombre;
+        selectEmpresa.appendChild(option);
+    });
+
+    // Habilitar el select y el botón de confirmar
+    document.getElementById("empresasRecomendadas").style.display = "block";
+    selectEmpresa.disabled = false;
+    document.getElementById("btnConfirmarEnvio").disabled = false;
+
+    // Mostrar mensaje de recomendación
+    resultado.innerHTML = "🚀 Se han encontrado empresas recomendadas. Por favor, seleccione una empresa para confirmar el envío.";
+
+};
+
+// Evento de selección de empresa y confirmación de envío
+document.getElementById("btnConfirmarEnvio").onclick = () => {
+    let empresaSeleccionada = document.getElementById("seleccionarEmpresa").value;
+    if (!empresaSeleccionada) {
+        resultado.innerHTML = "⚠️ Por favor, seleccione una empresa para continuar.";
+        return;
+    }
+
+    // Obtener la dirección y destino (siempre que estén seleccionados)
+    let direccionSeleccionada = direccion.value.trim();
+    let destinoSeleccionado = destino.value.trim();
+
+    if (!direccionSeleccionada || !destinoSeleccionado) {
+        resultado.innerHTML = "⚠️ Por favor, ingrese tanto la dirección como el destino antes de confirmar.";
+        return;
+    }
+
+    // Mostrar la confirmación de envío
+    resultado.innerHTML = `✅ Envío confirmado con la empresa: <b>${empresaSeleccionada}</b>. Se procederá con el envío.`;
 
     // Guardar en el historial
-    historialPrecios.push({ empresa, precio, direccion: direccion.value.trim(), destino: destino.value.trim() });
+    let historialEnvio = {
+        direccion: direccionSeleccionada,
+        destino: destinoSeleccionado,
+        empresa: empresaSeleccionada,
+        fecha: new Date().toLocaleString()
+    };
+
+    // Obtener historial de envíos desde el localStorage, si existe
+    let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+    historialPrecios.push(historialEnvio);
     localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
 
-    resultado.innerHTML = `🚀 Se recomienda: <b>${empresa}</b>. <br>💰 Precio estimado: <b>$${precio}</b> <br>📍 <b>Dirección:</b> ${direccion.value.trim()} <br>🌍 <b>Destino:</b> ${destino.value.trim()}`;
-
+    // Mostrar el historial actualizado
     verHistorial();
+
+    // Limpiar los campos después de la confirmación
     limpiarCampos();
+    document.getElementById("empresasRecomendadas").style.display = "none";  // Ocultar el contenedor de empresas recomendadas
+    document.getElementById("seleccionarEmpresa").disabled = true;  // Deshabilitar la selección
+    document.getElementById("btnConfirmarEnvio").disabled = true;  // Deshabilitar el botón
 };
+
+
+// Botón de aceptar la confirmación de envío
+btnAceptarConfirmacion.onclick = () => {
+    // Ocultar la ventana de confirmación de envío
+    confirmacionEnvio.style.display = "none";
+};
+
 
 // Función para limpiar los campos después del cálculo
 function limpiarCampos() {
     [alto, ancho, largo, peso].forEach(input => input.value = "");
     calcular.disabled = true; // Se vuelve a desactivar hasta nuevo ingreso de datos
+    direccion.value = "";
+    destino.value = "";
 }
-
-// Mostrar historial de envíos
 
 
 
@@ -129,25 +195,30 @@ function validarisNaN() {
     return true;
 }
 
+// Mostrar historial de envíos
+
 function verHistorial() {
+    let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+
     if (historialPrecios.length === 0) {
         historialContainer.style.display = "none";
         return;
     }
 
     historialContainer.style.display = "block";
-    historial.innerHTML = "<h2>📦 Historial de cálculos</h2>";
+    historial.innerHTML = "<h2>📦 Historial de Cálculos</h2>";
 
-    historialPrecios.map((item, index) => {
+    historialPrecios.forEach((item, index) => {
         let div = document.createElement("div");
         div.classList.add("historial-item");
         div.innerHTML = `
             📍 <b>Dirección:</b> ${item.direccion} <br>
-            🌍 <b>Destino:</b> ${item.destino} <br>
+            🏠 <b>Destino:</b> ${item.destino} <br>
             🚛 <b>Empresa:</b> ${item.empresa} <br>
-            💰 <b>Precio:</b> $${item.precio} 
+            📅 <b>Fecha:</b> ${item.fecha} <br>
             <button class="eliminar-item" data-index="${index}">❌ Eliminar</button>
         `;
+
         historial.appendChild(div);
     });
 
@@ -158,6 +229,16 @@ function verHistorial() {
             borrarItemHistorial(index);
         });
     });
+}
+
+// Eliminar un item del historial
+function borrarItemHistorial(index) {
+    let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+    historialPrecios.splice(index, 1);  // Eliminar el item en el índice especificado
+    localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
+
+    // Mostrar el historial actualizado
+    verHistorial();
 }
 
 
