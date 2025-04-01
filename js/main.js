@@ -11,6 +11,8 @@ let ancho = document.getElementById("txtAncho");
 let largo = document.getElementById("txtLargo");
 let peso = document.getElementById("txtPeso");
 
+let empresaEnvio = document.getElementById("empresaEnvio");
+
 //H1
 let resultado = document.getElementById("resultado"); // Para mostrar el resultado de calcular
 
@@ -20,6 +22,8 @@ let historialContainer = document.getElementById("historial-container");
 
 //array
 let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+if (!Array.isArray(historialPrecios)) historialPrecios = [];
+
 
 
 
@@ -34,6 +38,7 @@ calcular.onclick = () => {
     let total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
 
     let precio;
+    let empresa = empresaEnvio.value;
 
     if(total<=30){
         precio = 10000;
@@ -47,8 +52,9 @@ calcular.onclick = () => {
         precio = 50000;
     }
 
-    historialPrecios.push(precio);
+    historialPrecios.push({ empresa, precio });
     localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
+
 
     resultado.innerHTML = `El valor de su envío sería: $${precio}`;
 
@@ -64,21 +70,20 @@ function limpiarCampos() {
     peso.value = "";
 }
 
-function verHistorial () {
-
+function verHistorial() {
     if (historialPrecios.length === 0) {
         historialContainer.style.display = "none";
         return;
     }
 
-
-    historial.innerHTML = "<h2>Historial de calculos</h2>"
-
     historialContainer.style.display = "block";
+    historial.innerHTML = "<h2>Historial de cálculos</h2>"; // Limpia el historial antes de agregar nuevos valores
 
-    historialPrecios.forEach((precio, index)=>{
-        historial.innerHTML += `<p> ${index+1}. Precio: $${precio}</p>`;
-    })
+    historialPrecios.forEach((item, index) => {
+        let p = document.createElement("p");
+        p.textContent = `${index + 1}. Empresa: ${item.empresa} - Precio: $${item.precio}`;
+        historial.appendChild(p);
+    });
 }
 
 function validarisNaN() {
@@ -99,6 +104,5 @@ borrarHistorial.onclick = () => {
     verHistorial();
 
 };
-
 
 
