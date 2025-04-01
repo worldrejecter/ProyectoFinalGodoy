@@ -171,3 +171,39 @@ button:hover {
 .eliminar-item:hover {
     background-color: darkred;
 }
+#precio-estimado {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #4CAF50;
+}
+
+#precio-estimado b {
+    color: #FF5722;
+}
+.editar-item {
+    margin-left: 10px;
+    background-color: #FF9800;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.editar-item:hover {
+    background-color: #FF5722;
+}
+
+#btnConfirmarEdicion {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#btnConfirmarEdicion:hover {
+    background-color: #45a049;
+}
+

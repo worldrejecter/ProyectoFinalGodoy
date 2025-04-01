@@ -49,7 +49,6 @@ const empresasDisponibles = [
 ];
 
 
-// Evento para seleccionar dirección
 // Evento para confirmar dirección y destino
 btnConfirmarDireccionDestino.onclick = () => {
     if (direccion.value.trim() === "" || destino.value.trim() === "") {
@@ -110,15 +109,31 @@ calcular.onclick = () => {
 
 };
 
+document.getElementById("seleccionarEmpresa").addEventListener("change", () => {
+    let empresaSeleccionada = document.getElementById("seleccionarEmpresa").value;
+    let total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
+    
+    // Buscar la empresa seleccionada en la lista de empresas disponibles
+    let empresaData = empresasDisponibles.find(empresa => empresa.nombre === empresaSeleccionada);
+
+    if (empresaData) {
+        let precioEstimado = empresaData.precio;
+        resultado.innerHTML = `📦 Precio estimado con <b>${empresaSeleccionada}</b>: $${precioEstimado}`;
+    }
+})
+
 // Evento de selección de empresa y confirmación de envío
+// Evento de confirmación de envío
 document.getElementById("btnConfirmarEnvio").onclick = () => {
     let empresaSeleccionada = document.getElementById("seleccionarEmpresa").value;
+    let total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
+
     if (!empresaSeleccionada) {
         resultado.innerHTML = "⚠️ Por favor, seleccione una empresa para continuar.";
         return;
     }
 
-    // Obtener la dirección y destino (siempre que estén seleccionados)
+    // Obtener la dirección y destino
     let direccionSeleccionada = direccion.value.trim();
     let destinoSeleccionado = destino.value.trim();
 
@@ -127,14 +142,19 @@ document.getElementById("btnConfirmarEnvio").onclick = () => {
         return;
     }
 
+    // Buscar la empresa seleccionada
+    let empresaData = empresasDisponibles.find(empresa => empresa.nombre === empresaSeleccionada);
+    let precioEstimado = empresaData ? empresaData.precio : 0;
+
     // Mostrar la confirmación de envío
-    resultado.innerHTML = `✅ Envío confirmado con la empresa: <b>${empresaSeleccionada}</b>. Se procederá con el envío.`;
+    resultado.innerHTML = `✅ Envío confirmado con la empresa: <b>${empresaSeleccionada}</b>. Precio final: $${precioEstimado}. Se procederá con el envío.`;
 
     // Guardar en el historial
     let historialEnvio = {
         direccion: direccionSeleccionada,
         destino: destinoSeleccionado,
         empresa: empresaSeleccionada,
+        precio: precioEstimado,
         fecha: new Date().toLocaleString()
     };
 
@@ -152,6 +172,7 @@ document.getElementById("btnConfirmarEnvio").onclick = () => {
     document.getElementById("seleccionarEmpresa").disabled = true;  // Deshabilitar la selección
     document.getElementById("btnConfirmarEnvio").disabled = true;  // Deshabilitar el botón
 };
+
 
 
 // Botón de aceptar la confirmación de envío
@@ -216,6 +237,7 @@ function verHistorial() {
             🏠 <b>Destino:</b> ${item.destino} <br>
             🚛 <b>Empresa:</b> ${item.empresa} <br>
             📅 <b>Fecha:</b> ${item.fecha} <br>
+            💰 <b>Precio:</b> $${item.precio} <br>
             <button class="eliminar-item" data-index="${index}">❌ Eliminar</button>
         `;
 
