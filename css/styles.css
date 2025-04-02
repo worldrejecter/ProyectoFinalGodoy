@@ -238,18 +238,12 @@ button:disabled {
     background-color: #4CAF50 !important;
 }
 
-/* ===== [TUS ESTILOS ACTUALES PERMANECEN IGUAL] ===== */
-/* [Todo tu CSS existente se mantiene igual aquí] */
-
-/* ===== ESTILOS PARA EL FORMULARIO DE PAGO ===== */
-
-/* Contenedor principal */
 .contenedor-pago {
     text-align: left;
     margin: 15px 0;
 }
 
-/* Resumen del envío */
+
 .resumen-envio {
     background: #f8f9fa;
     padding: 15px;
@@ -268,13 +262,13 @@ button:disabled {
     color: #2c3e50;
 }
 
-/* Contenedor principal */
+
 .contenedor-pago {
     text-align: left;
     margin: 15px 0;
 }
 
-/* Resumen del envío */
+
 .resumen-envio {
     background: #f8f9fa;
     padding: 15px;
@@ -293,7 +287,7 @@ button:disabled {
     color: #2c3e50;
 }
 
-/* Campos del formulario */
+
 .campo-pago {
     width: 100%;
     padding: 12px;
@@ -311,26 +305,26 @@ button:disabled {
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
 }
 
-/* Estado válido */
+
 .campo-pago:valid {
     border-color: #4CAF50;
     background-color: #f8faf8;
 }
 
-/* Estado inválido (solo cuando no está en foco) */
+
 .campo-pago:invalid:not(:focus):not(:placeholder-shown) {
     border-color: #ffcdd2;
     background-color: #ffebee;
 }
 
-/* Disposición para fecha y CVV */
+
 .contenedor-fila {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
 }
 
-/* Nota de demostración */
+
 .nota-demo {
     margin-top: 20px;
     padding: 12px;
@@ -341,7 +335,7 @@ button:disabled {
     color: #FF6F00;
 }
 
-/* Mensajes de validación */
+
 .swal2-validation-message {
     background: #ffebee !important;
     color: #c62828 !important;
@@ -349,7 +343,7 @@ button:disabled {
     font-size: 14px !important;
 }
 
-/* Adaptación para móviles */
+
 @media (max-width: 480px) {
     .contenedor-fila {
         grid-template-columns: 1fr;
