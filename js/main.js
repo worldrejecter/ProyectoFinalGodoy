@@ -141,7 +141,61 @@ function manejarPago(index) {
     
     if (!item) return;
 
-    Swal.fire({
+    // Función para validar un campo específico
+    function validarCampo(campo, tipo) {
+        const valor = campo.value;
+        let valido = false;
+        
+        switch(tipo) {
+            case 'nombre':
+                valido = /^[A-Za-z ]{3,}$/.test(valor);
+                break;
+            case 'numero':
+                const num = valor.replace(/\s/g, '');
+                valido = /^\d{16}$/.test(num);
+                break;
+            case 'fecha':
+                valido = /^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(valor);
+                break;
+            case 'cvv':
+                valido = /^\d{3}$/.test(valor);
+                break;
+        }
+        
+        // Aplicar clases CSS
+        if (valor === '') {
+            campo.classList.remove('valido', 'invalido');
+        } else {
+            campo.classList.toggle('valido', valido);
+            campo.classList.toggle('invalido', !valido);
+        }
+        
+        return valido;
+    }
+
+    // Función para validar todos los campos
+    function validarCampos() {
+        const nombreValido = validarCampo(document.getElementById('nombre-tarjeta'), 'nombre');
+        const numeroValido = validarCampo(document.getElementById('numero-tarjeta'), 'numero');
+        const fechaValida = validarCampo(document.getElementById('fecha-tarjeta'), 'fecha');
+        const cvvValido = validarCampo(document.getElementById('cvv-tarjeta'), 'cvv');
+        
+        return nombreValido && numeroValido && fechaValida && cvvValido;
+    }
+
+    // Función para actualizar el estado del botón
+    function actualizarBotonPagar() {
+        const botonPagar = document.querySelector('.swal2-confirm');
+        if (validarCampos()) {
+            botonPagar.disabled = false;
+            botonPagar.classList.remove('boton-deshabilitado');
+        } else {
+            botonPagar.disabled = true;
+            botonPagar.classList.add('boton-deshabilitado');
+        }
+    }
+
+    const swalInstance = Swal.fire({
         title: 'Procesar Pago',
         html: `
             <div class="contenedor-pago">
@@ -156,8 +210,8 @@ function manejarPago(index) {
                         id="nombre-tarjeta"
                         class="campo-pago" 
                         placeholder="Nombre del titular"
-                        pattern="[A-Za-z ]{3,}"
                         required
+                        oninput="validarCampo(this, 'nombre'); actualizarBotonPagar()"
                     >
                     <input 
                         id="numero-tarjeta"
@@ -165,7 +219,7 @@ function manejarPago(index) {
                         placeholder="Número de tarjeta"
                         maxlength="19"
                         required
-                        oninput="window.formatearNumeroTarjeta(this)"
+                        oninput="formatearNumeroTarjeta(this); validarCampo(this, 'numero'); actualizarBotonPagar()"
                     >
                     <div class="contenedor-fila">
                         <input 
@@ -174,7 +228,7 @@ function manejarPago(index) {
                             placeholder="MM/AA"
                             maxlength="5"
                             required
-                            oninput="window.formatearFechaTarjeta(this)"
+                            oninput="formatearFechaTarjeta(this); validarCampo(this, 'fecha'); actualizarBotonPagar()"
                         >
                         <input 
                             id="cvv-tarjeta"
@@ -182,8 +236,8 @@ function manejarPago(index) {
                             placeholder="CVV"
                             type="password"
                             maxlength="3"
-                            pattern="[0-9]{3}"
                             required
+                            oninput="validarCampo(this, 'cvv'); actualizarBotonPagar()"
                         >
                     </div>
                 </div>
@@ -198,6 +252,28 @@ function manejarPago(index) {
         cancelButtonText: 'Cancelar',
         focusConfirm: false,
         allowOutsideClick: false,
+        didOpen: () => {
+            // Inicializar el botón como deshabilitado
+            const botonPagar = document.querySelector('.swal2-confirm');
+            botonPagar.disabled = true;
+            botonPagar.classList.add('boton-deshabilitado');
+            
+            // Auto-completar datos de prueba para desarrollo
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                document.getElementById('nombre-tarjeta').value = 'TITULAR PRUEBA';
+                document.getElementById('numero-tarjeta').value = '4242 4242 4242 4242';
+                document.getElementById('fecha-tarjeta').value = '12/25';
+                document.getElementById('cvv-tarjeta').value = '123';
+                
+                // Validar todos los campos después de autocompletar
+                validarCampos();
+                actualizarBotonPagar();
+            }
+            
+            // Registrar funciones en el ámbito global
+            window.validarCampo = validarCampo;
+            window.actualizarBotonPagar = actualizarBotonPagar;
+        },
         preConfirm: () => {
             const numeroTarjeta = document.getElementById('numero-tarjeta').value.replace(/\s/g, '');
             const fechaTarjeta = document.getElementById('fecha-tarjeta').value;
@@ -208,17 +284,10 @@ function manejarPago(index) {
                 fecha: fechaTarjeta,
                 cvv: document.getElementById('cvv-tarjeta').value
             }
-        },
-        willOpen: () => {
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                document.getElementById('numero-tarjeta').value = '4242 4242 4242 4242';
-                document.getElementById('fecha-tarjeta').value = '12/25';
-                document.getElementById('cvv-tarjeta').value = '123';
-                document.getElementById('nombre-tarjeta').value = 'TITULAR PRUEBA';
-            }
         }
     }).then((result) => {
         if (result.isConfirmed) {
+            // Validación adicional (por si acaso)
             if (!/^\d{16}$/.test(result.value.numero)) {
                 Swal.showValidationMessage('Número de tarjeta inválido (deben ser 16 dígitos)');
                 return false;
@@ -248,6 +317,21 @@ function manejarPago(index) {
             });
         }
     });
+}
+
+
+window.formatearNumeroTarjeta = function(input) {
+    let value = input.value.replace(/\s/g, '');
+    value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+    input.value = value.substring(0, 19);
+}
+
+window.formatearFechaTarjeta = function(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+    input.value = value.substring(0, 5);
 }
 
 function generarIdTransaccion() {

@@ -354,3 +354,41 @@ button:disabled {
         padding: 20px !important;
     }
 }
+
+/* Estilos para validación de campos */
+.campo-pago.invalido {
+    border: 2px solid #ff4444 !important;
+    background-color: #ffeeee !important;
+}
+
+.campo-pago.valido {
+    border: 2px solid #4CAF50 !important;
+    background-color: #f8faf8 !important;
+}
+
+
+.boton-deshabilitado {
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+    background-color: #cccccc !important;
+}
+
+
+.mensaje-error {
+    color: #ff4444;
+    font-size: 13px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    display: none;
+}
+
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+.campo-pago.invalido {
+    animation: shake 0.5s ease-in-out;
+}
