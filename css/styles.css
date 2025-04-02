@@ -224,3 +224,16 @@ button:disabled {
 .active {
     box-shadow: 0 0 0 2px gold;
 }
+
+.eliminar-item {
+    background-color: #f44336 !important;
+    margin-right: 8px;
+}
+
+.eliminar-item:hover {
+    background-color: #d32f2f !important;
+}
+
+.swal2-confirm.btn-confirm {
+    background-color: #4CAF50 !important;
+}

@@ -29,20 +29,7 @@ const closeModalPago = document.getElementById("closeModalPago");
 const formPago = document.getElementById("formPago");
 const mensajePago = document.getElementById("mensajePago");
 
-const empresasDisponibles = [
-    { nombre: "DHL", limite: 20, precio: 12000 },
-    { nombre: "FedEx", limite: 40, precio: 22000 },
-    { nombre: "UPS", limite: 60, precio: 30000 },
-    { nombre: "USPS", limite: 80, precio: 38000 },
-    { nombre: "Amazon Logistics", limite: 100, precio: 48000 },
-    { nombre: "BlueDart", limite: 120, precio: 55000 },
-    { nombre: "Estafeta", limite: 150, precio: 65000 },
-    { nombre: "Ninja Van", limite: 175, precio: 72000 },
-    { nombre: "Crown Worldwide", limite: 200, precio: 80000 },
-    { nombre: "TNT Express", limite: 250, precio: 85000 },
-    { nombre: "XPO Logistics", limite: 300, precio: 90000 },
-    { nombre: "Yamato Transport", limite: 350, precio: 95000 }
-];
+let empresasDisponibles = [];
 
 function validarMedidas() {
     const medidas = [alto, ancho, largo, peso];
@@ -60,9 +47,33 @@ function validarMedidas() {
     return true;
 }
 
-/**
- * Limpia todos los campos del formulario después de confirmar un envío.
- */
+async function cargarEmpresas() {
+    try {
+      const response = await fetch('./data/empresas.json');
+      if (!response.ok) throw new Error("Error al cargar empresas");
+      empresasDisponibles = await response.json();
+      console.log("Empresas cargadas:", empresasDisponibles);
+    } catch (error) {
+      console.error("Error:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error crítico',
+        text: 'No se pudieron cargar las empresas de envío'
+      });
+      // Datos de respaldo
+      empresasDisponibles = [
+        { nombre: "DHL", limite: 20, precio: 12000 },
+        { nombre: "FedEx", limite: 40, precio: 22000 }
+      ];
+    }
+  }
+  
+  // Llama a esta función al inicio:
+  document.addEventListener("DOMContentLoaded", () => {
+    cargarEmpresas();
+    verHistorial();
+  });
+
 function limpiarCampos() {
     direccion.value = "";
     destino.value = "";
@@ -284,10 +295,32 @@ historial.addEventListener("click", (e) => {
 
 
 function borrarItemHistorial(index) {
-    const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios"));
-    historialPrecios.splice(index, 1);
-    localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
-    verHistorial();
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esta acción!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+            const itemEliminado = historialPrecios[index]; // Guardamos referencia para el mensaje
+            
+            historialPrecios.splice(index, 1);
+            localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
+            
+            verHistorial(); // Actualizamos la vista
+            
+            Swal.fire(
+                '¡Eliminado!',
+                `El envío a ${itemEliminado.destino} (${itemEliminado.empresa}) fue eliminado.`,
+                'success'
+            );
+        }
+    });
 }
 
 function abrirModalPago(index) {

@@ -1,0 +1,14 @@
+[
+    { "nombre": "DHL", "limite": 20, "precio": 12000 },
+    { "nombre": "FedEx", "limite": 40, "precio": 22000 },
+    { "nombre": "UPS", "limite": 60, "precio": 30000 },
+    { "nombre": "USPS", "limite": 80, "precio": 38000 },
+    { "nombre": "Amazon Logistics", "limite": 100, "precio": 48000 },
+    { "nombre": "BlueDart", "limite": 120, "precio": 55000 },
+    { "nombre": "Estafeta", "limite": 150, "precio": 65000 },
+    { "nombre": "Ninja Van", "limite": 175, "precio": 72000 },
+    { "nombre": "Crown Worldwide", "limite": 200, "precio": 80000 },
+    { "nombre": "TNT Express", "limite": 250, "precio": 85000 },
+    { "nombre": "XPO Logistics", "limite": 300, "precio": 90000 },
+    { "nombre": "Yamato Transport", "limite": 350, "precio": 95000 }
+]
