@@ -109,61 +109,103 @@ function verHistorial() {
     });
 }
 
-// Función para manejar pagos
 function manejarPago(index) {
     const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
     const item = historialPrecios[index];
     
     if (!item) return;
 
-    // Datos de prueba
-    const datosPrueba = {
-        tarjeta: '4242 4242 4242 4242',
-        fecha: '12/25',
-        cvv: '123',
-        nombre: 'TITULAR DE PRUEBA'
-    };
-
     Swal.fire({
         title: 'Procesar Pago',
         html: `
-            <div style="text-align: left; margin: 15px 0;">
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div class="contenedor-pago">
+                <div class="resumen-envio">
                     <p><b>Destino:</b> ${item.destino}</p>
                     <p><b>Empresa:</b> ${item.empresa}</p>
-                    <p><b>Total a pagar:</b> $${item.precio}</p>
+                    <p><b>Total:</b> $${item.precio}</p>
                 </div>
                 
                 <div class="formulario-pago">
-                    <input value="${datosPrueba.nombre}" class="swal2-input" placeholder="Nombre" id="nombre-tarjeta">
-                    <input value="${datosPrueba.tarjeta}" class="swal2-input" placeholder="Tarjeta" id="numero-tarjeta">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <input value="${datosPrueba.fecha}" class="swal2-input" placeholder="MM/AA" id="fecha-tarjeta">
-                        <input value="${datosPrueba.cvv}" class="swal2-input" placeholder="CVV" id="cvv-tarjeta" type="password">
+                    <input 
+                        id="nombre-tarjeta"
+                        class="campo-pago" 
+                        placeholder="Nombre del titular"
+                        pattern="[A-Za-z ]{3,}"
+                        required
+                    >
+                    <input 
+                        id="numero-tarjeta"
+                        class="campo-pago" 
+                        placeholder="Número de tarjeta (16 dígitos)"
+                        maxlength="16"
+                        pattern="[0-9]{16}"
+                        required
+                    >
+                    <div class="contenedor-fila">
+                        <input 
+                            id="fecha-tarjeta"
+                            class="campo-pago" 
+                            placeholder="MM/AA"
+                            maxlength="5"
+                            pattern="(0[1-9]|1[0-2])\/[0-9]{2}"
+                            required
+                        >
+                        <input 
+                            id="cvv-tarjeta"
+                            class="campo-pago" 
+                            placeholder="CVV"
+                            type="password"
+                            maxlength="3"
+                            pattern="[0-9]{3}"
+                            required
+                        >
                     </div>
                 </div>
                 
-                <div style="margin-top: 15px; font-size: 12px; color: #6c757d;">
-                    <p>💡 <b>Datos de prueba:</b> Puedes modificarlos o usar los predefinidos</p>
+                <div class="nota-demo">
+                    <p><b>💡</b> Datos de prueba: Use <b>4242 4242 4242 4242</b>, <b>12/25</b>, <b>123</b></p>
                 </div>
             </div>
         `,
         showCancelButton: true,
-        confirmButtonText: 'Confirmar Pago',
+        confirmButtonText: 'Pagar $' + item.precio,
         cancelButtonText: 'Cancelar',
+        focusConfirm: false,
+        allowOutsideClick: false,
         preConfirm: () => {
             return {
                 nombre: document.getElementById('nombre-tarjeta').value,
-                tarjeta: document.getElementById('numero-tarjeta').value,
+                numero: document.getElementById('numero-tarjeta').value,
                 fecha: document.getElementById('fecha-tarjeta').value,
                 cvv: document.getElementById('cvv-tarjeta').value
+            }
+        },
+        willOpen: () => {
+            // Auto-completar datos de prueba para desarrollo
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                document.getElementById('numero-tarjeta').value = '4242424242424242';
+                document.getElementById('fecha-tarjeta').value = '12/25';
+                document.getElementById('cvv-tarjeta').value = '123';
+                document.getElementById('nombre-tarjeta').value = 'TITULAR PRUEBA';
             }
         }
     }).then((result) => {
         if (result.isConfirmed) {
+            // Validación adicional
+            if (!validarTarjeta(result.value.numero)) {
+                Swal.showValidationMessage('Número de tarjeta inválido');
+                return false;
+            }
+            
+            if (!validarFecha(result.value.fecha)) {
+                Swal.showValidationMessage('Fecha de expiración inválida');
+                return false;
+            }
+
+            // Simular procesamiento
             Swal.fire({
                 title: 'Procesando pago...',
-                timer: 1500,
+                timer: 2000,
                 timerProgressBar: true,
                 didOpen: () => Swal.showLoading()
             }).then(() => {
@@ -174,12 +216,34 @@ function manejarPago(index) {
                 
                 Swal.fire(
                     '¡Pago exitoso!',
-                    `$${item.precio} pagados a ${item.empresa}<br><small>ID: TRX-${Math.random().toString(36).substring(2, 10).toUpperCase()}</small>`,
+                    `$${item.precio} procesados a ${item.empresa}<br>
+                    <small>ID: ${generarIdTransaccion()}</small>`,
                     'success'
                 );
             });
         }
     });
+}
+
+// Funciones de validación
+function validarTarjeta(numero) {
+    return /^[0-9]{16}$/.test(numero);
+}
+
+function validarFecha(fecha) {
+    const [mes, año] = fecha.split('/');
+    if (!mes || !año) return false;
+    
+    const mesActual = new Date().getMonth() + 1;
+    const añoActual = new Date().getFullYear() % 100;
+    
+    // Validar formato MM/AA
+    return /^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(fecha) && 
+           (año > añoActual || (año == añoActual && mes >= mesActual));
+}
+
+function generarIdTransaccion() {
+    return 'TRX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
 }
 
 // Eliminar item del historial

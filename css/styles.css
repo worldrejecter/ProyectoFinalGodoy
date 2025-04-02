@@ -237,3 +237,126 @@ button:disabled {
 .swal2-confirm.btn-confirm {
     background-color: #4CAF50 !important;
 }
+
+/* ===== [TUS ESTILOS ACTUALES PERMANECEN IGUAL] ===== */
+/* [Todo tu CSS existente se mantiene igual aquí] */
+
+/* ===== ESTILOS PARA EL FORMULARIO DE PAGO ===== */
+
+/* Contenedor principal */
+.contenedor-pago {
+    text-align: left;
+    margin: 15px 0;
+}
+
+/* Resumen del envío */
+.resumen-envio {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #4CAF50;
+}
+
+.resumen-envio p {
+    margin: 8px 0;
+    color: #333;
+    font-size: 15px;
+}
+
+.resumen-envio b {
+    color: #2c3e50;
+}
+
+/* Contenedor principal */
+.contenedor-pago {
+    text-align: left;
+    margin: 15px 0;
+}
+
+/* Resumen del envío */
+.resumen-envio {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #4CAF50;
+}
+
+.resumen-envio p {
+    margin: 8px 0;
+    color: #333;
+    font-size: 15px;
+}
+
+.resumen-envio b {
+    color: #2c3e50;
+}
+
+/* Campos del formulario */
+.campo-pago {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 15px;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.campo-pago:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+/* Estado válido */
+.campo-pago:valid {
+    border-color: #4CAF50;
+    background-color: #f8faf8;
+}
+
+/* Estado inválido (solo cuando no está en foco) */
+.campo-pago:invalid:not(:focus):not(:placeholder-shown) {
+    border-color: #ffcdd2;
+    background-color: #ffebee;
+}
+
+/* Disposición para fecha y CVV */
+.contenedor-fila {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Nota de demostración */
+.nota-demo {
+    margin-top: 20px;
+    padding: 12px;
+    background: #fff8e1;
+    border-radius: 5px;
+    border-left: 4px solid #FFC107;
+    font-size: 14px;
+    color: #FF6F00;
+}
+
+/* Mensajes de validación */
+.swal2-validation-message {
+    background: #ffebee !important;
+    color: #c62828 !important;
+    margin-top: 15px !important;
+    font-size: 14px !important;
+}
+
+/* Adaptación para móviles */
+@media (max-width: 480px) {
+    .contenedor-fila {
+        grid-template-columns: 1fr;
+    }
+    
+    .swal2-popup {
+        width: 95% !important;
+        padding: 20px !important;
+    }
+}
