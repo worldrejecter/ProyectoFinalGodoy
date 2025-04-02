@@ -109,6 +109,32 @@ function verHistorial() {
     });
 }
 
+
+window.formatearNumeroTarjeta = function(input) {
+    // Eliminar todos los espacios existentes
+    let value = input.value.replace(/\s/g, '');
+    
+    // Agregar un espacio cada 4 dígitos
+    value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+    
+    // Actualizar el valor del input (máximo 19 caracteres: 16 dígitos + 3 espacios)
+    input.value = value.substring(0, 19);
+}
+
+window.formatearFechaTarjeta = function(input) {
+    // Eliminar todo excepto dígitos
+    let value = input.value.replace(/\D/g, '');
+    
+    // Insertar "/" después de los primeros 2 dígitos
+    if (value.length > 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+    
+    // Actualizar el valor del input (máximo 5 caracteres: MM/AA)
+    input.value = value.substring(0, 5);
+}
+
+
 function manejarPago(index) {
     const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
     const item = historialPrecios[index];
@@ -137,9 +163,9 @@ function manejarPago(index) {
                         id="numero-tarjeta"
                         class="campo-pago" 
                         placeholder="Número de tarjeta"
-                        maxlength="19"  // 16 dígitos + 3 espacios
+                        maxlength="19"
                         required
-                        oninput="formatearNumeroTarjeta(this)"
+                        oninput="window.formatearNumeroTarjeta(this)"
                     >
                     <div class="contenedor-fila">
                         <input 
@@ -148,7 +174,7 @@ function manejarPago(index) {
                             placeholder="MM/AA"
                             maxlength="5"
                             required
-                            oninput="formatearFechaTarjeta(this)"
+                            oninput="window.formatearFechaTarjeta(this)"
                         >
                         <input 
                             id="cvv-tarjeta"
@@ -173,19 +199,17 @@ function manejarPago(index) {
         focusConfirm: false,
         allowOutsideClick: false,
         preConfirm: () => {
-            // Obtener valores sin formato para validación
             const numeroTarjeta = document.getElementById('numero-tarjeta').value.replace(/\s/g, '');
             const fechaTarjeta = document.getElementById('fecha-tarjeta').value;
             
             return {
                 nombre: document.getElementById('nombre-tarjeta').value,
-                numero: numeroTarjeta,  // Enviar sin espacios
+                numero: numeroTarjeta,
                 fecha: fechaTarjeta,
                 cvv: document.getElementById('cvv-tarjeta').value
             }
         },
         willOpen: () => {
-            // Auto-completar datos de prueba para desarrollo (ya formateados)
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                 document.getElementById('numero-tarjeta').value = '4242 4242 4242 4242';
                 document.getElementById('fecha-tarjeta').value = '12/25';
@@ -195,7 +219,6 @@ function manejarPago(index) {
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            // Validación adicional (usa los valores sin formato)
             if (!/^\d{16}$/.test(result.value.numero)) {
                 Swal.showValidationMessage('Número de tarjeta inválido (deben ser 16 dígitos)');
                 return false;
@@ -206,14 +229,12 @@ function manejarPago(index) {
                 return false;
             }
 
-            // Simular procesamiento
             Swal.fire({
                 title: 'Procesando pago...',
                 timer: 2000,
                 timerProgressBar: true,
                 didOpen: () => Swal.showLoading()
             }).then(() => {
-                // Marcar como pagado
                 item.pagado = true;
                 localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
                 verHistorial();
@@ -228,33 +249,6 @@ function manejarPago(index) {
         }
     });
 }
-
-
-function formatearNumeroTarjeta(input) {
-    // Eliminar todos los espacios existentes
-    let value = input.value.replace(/\s/g, '');
-    
-    // Agregar un espacio cada 4 dígitos
-    value = value.replace(/(\d{4})/g, '$1 ').trim();
-    
-    // Actualizar el valor del input (máximo 19 caracteres: 16 dígitos + 3 espacios)
-    input.value = value.substring(0, 19);
-}
-
-
-function formatearFechaTarjeta(input) {
-    // Eliminar todo excepto dígitos
-    let value = input.value.replace(/\D/g, '');
-    
-    // Insertar "/" después de los primeros 2 dígitos
-    if (value.length > 2) {
-        value = value.substring(0, 2) + '/' + value.substring(2, 4);
-    }
-    
-    // Actualizar el valor del input (máximo 5 caracteres: MM/AA)
-    input.value = value.substring(0, 5);
-}
-
 
 function generarIdTransaccion() {
     return 'TRX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
