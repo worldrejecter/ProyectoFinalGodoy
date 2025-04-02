@@ -136,10 +136,10 @@ function manejarPago(index) {
                     <input 
                         id="numero-tarjeta"
                         class="campo-pago" 
-                        placeholder="Número de tarjeta (16 dígitos)"
-                        maxlength="16"
-                        pattern="[0-9]{16}"
+                        placeholder="Número de tarjeta"
+                        maxlength="19"  // 16 dígitos + 3 espacios
                         required
+                        oninput="formatearNumeroTarjeta(this)"
                     >
                     <div class="contenedor-fila">
                         <input 
@@ -147,8 +147,8 @@ function manejarPago(index) {
                             class="campo-pago" 
                             placeholder="MM/AA"
                             maxlength="5"
-                            pattern="(0[1-9]|1[0-2])\/[0-9]{2}"
                             required
+                            oninput="formatearFechaTarjeta(this)"
                         >
                         <input 
                             id="cvv-tarjeta"
@@ -163,7 +163,7 @@ function manejarPago(index) {
                 </div>
                 
                 <div class="nota-demo">
-                    <p><b>💡</b> Datos de prueba: Use <b>4242 4242 4242 4242</b>, <b>12/25</b>, <b>123</b></p>
+                    <p><b>💡</b> Datos de prueba: <b>4242 4242 4242 4242</b>, <b>12/25</b>, <b>123</b></p>
                 </div>
             </div>
         `,
@@ -173,17 +173,21 @@ function manejarPago(index) {
         focusConfirm: false,
         allowOutsideClick: false,
         preConfirm: () => {
+            // Obtener valores sin formato para validación
+            const numeroTarjeta = document.getElementById('numero-tarjeta').value.replace(/\s/g, '');
+            const fechaTarjeta = document.getElementById('fecha-tarjeta').value;
+            
             return {
                 nombre: document.getElementById('nombre-tarjeta').value,
-                numero: document.getElementById('numero-tarjeta').value,
-                fecha: document.getElementById('fecha-tarjeta').value,
+                numero: numeroTarjeta,  // Enviar sin espacios
+                fecha: fechaTarjeta,
                 cvv: document.getElementById('cvv-tarjeta').value
             }
         },
         willOpen: () => {
-            // Auto-completar datos de prueba para desarrollo
+            // Auto-completar datos de prueba para desarrollo (ya formateados)
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                document.getElementById('numero-tarjeta').value = '4242424242424242';
+                document.getElementById('numero-tarjeta').value = '4242 4242 4242 4242';
                 document.getElementById('fecha-tarjeta').value = '12/25';
                 document.getElementById('cvv-tarjeta').value = '123';
                 document.getElementById('nombre-tarjeta').value = 'TITULAR PRUEBA';
@@ -191,14 +195,14 @@ function manejarPago(index) {
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            // Validación adicional
-            if (!validarTarjeta(result.value.numero)) {
-                Swal.showValidationMessage('Número de tarjeta inválido');
+            // Validación adicional (usa los valores sin formato)
+            if (!/^\d{16}$/.test(result.value.numero)) {
+                Swal.showValidationMessage('Número de tarjeta inválido (deben ser 16 dígitos)');
                 return false;
             }
             
-            if (!validarFecha(result.value.fecha)) {
-                Swal.showValidationMessage('Fecha de expiración inválida');
+            if (!/^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(result.value.fecha)) {
+                Swal.showValidationMessage('Fecha de expiración inválida (Use formato MM/AA)');
                 return false;
             }
 
@@ -225,22 +229,32 @@ function manejarPago(index) {
     });
 }
 
-// Funciones de validación
-function validarTarjeta(numero) {
-    return /^[0-9]{16}$/.test(numero);
+
+function formatearNumeroTarjeta(input) {
+    // Eliminar todos los espacios existentes
+    let value = input.value.replace(/\s/g, '');
+    
+    // Agregar un espacio cada 4 dígitos
+    value = value.replace(/(\d{4})/g, '$1 ').trim();
+    
+    // Actualizar el valor del input (máximo 19 caracteres: 16 dígitos + 3 espacios)
+    input.value = value.substring(0, 19);
 }
 
-function validarFecha(fecha) {
-    const [mes, año] = fecha.split('/');
-    if (!mes || !año) return false;
+
+function formatearFechaTarjeta(input) {
+    // Eliminar todo excepto dígitos
+    let value = input.value.replace(/\D/g, '');
     
-    const mesActual = new Date().getMonth() + 1;
-    const añoActual = new Date().getFullYear() % 100;
+    // Insertar "/" después de los primeros 2 dígitos
+    if (value.length > 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
     
-    // Validar formato MM/AA
-    return /^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(fecha) && 
-           (año > añoActual || (año == añoActual && mes >= mesActual));
+    // Actualizar el valor del input (máximo 5 caracteres: MM/AA)
+    input.value = value.substring(0, 5);
 }
+
 
 function generarIdTransaccion() {
     return 'TRX-' + Math.random().toString(36).substring(2, 10).toUpperCase();
