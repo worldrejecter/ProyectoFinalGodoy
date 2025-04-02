@@ -295,8 +295,9 @@ button:disabled {
     border: 2px solid #ddd;
     border-radius: 5px;
     font-size: 15px;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
     box-sizing: border-box;
+    
 }
 
 .campo-pago:focus {
@@ -357,12 +358,12 @@ button:disabled {
 
 /* Estilos para validación de campos */
 .campo-pago.invalido {
-    border: 2px solid #ff4444 !important;
+    border-color: #ff4444 !important;
     background-color: #ffeeee !important;
 }
 
 .campo-pago.valido {
-    border: 2px solid #4CAF50 !important;
+    border-color: #4CAF50 !important;
     background-color: #f8faf8 !important;
 }
 

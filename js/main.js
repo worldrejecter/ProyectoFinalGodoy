@@ -162,7 +162,7 @@ function manejarPago(index) {
                 break;
         }
         
-        // Aplicar clases CSS
+        // Aplicar clases CSS solo si el campo no está vacío
         if (valor === '') {
             campo.classList.remove('valido', 'invalido');
         } else {
@@ -211,7 +211,8 @@ function manejarPago(index) {
                         class="campo-pago" 
                         placeholder="Nombre del titular"
                         required
-                        oninput="validarCampo(this, 'nombre'); actualizarBotonPagar()"
+                        onblur="validarCampo(this, 'nombre'); actualizarBotonPagar()"
+                        oninput="actualizarBotonPagar()"
                     >
                     <input 
                         id="numero-tarjeta"
@@ -219,7 +220,8 @@ function manejarPago(index) {
                         placeholder="Número de tarjeta"
                         maxlength="19"
                         required
-                        oninput="formatearNumeroTarjeta(this); validarCampo(this, 'numero'); actualizarBotonPagar()"
+                        onblur="validarCampo(this, 'numero'); actualizarBotonPagar()"
+                        oninput="formatearNumeroTarjeta(this); actualizarBotonPagar()"
                     >
                     <div class="contenedor-fila">
                         <input 
@@ -228,7 +230,8 @@ function manejarPago(index) {
                             placeholder="MM/AA"
                             maxlength="5"
                             required
-                            oninput="formatearFechaTarjeta(this); validarCampo(this, 'fecha'); actualizarBotonPagar()"
+                            onblur="validarCampo(this, 'fecha'); actualizarBotonPagar()"
+                            oninput="formatearFechaTarjeta(this); actualizarBotonPagar()"
                         >
                         <input 
                             id="cvv-tarjeta"
@@ -237,7 +240,8 @@ function manejarPago(index) {
                             type="password"
                             maxlength="3"
                             required
-                            oninput="validarCampo(this, 'cvv'); actualizarBotonPagar()"
+                            onblur="validarCampo(this, 'cvv'); actualizarBotonPagar()"
+                            oninput="actualizarBotonPagar()"
                         >
                     </div>
                 </div>
@@ -319,7 +323,7 @@ function manejarPago(index) {
     });
 }
 
-
+// Funciones auxiliares (asegúrate de que estén en el ámbito global)
 window.formatearNumeroTarjeta = function(input) {
     let value = input.value.replace(/\s/g, '');
     value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
