@@ -1,46 +1,34 @@
+// =============================================
+// === ELEMENTOS DEL DOM (INTERFAZ DE USUARIO) ===
+// =============================================
+
 // Botones
-//let seleccionarDireccion = document.getElementById("btnSeleccionarDireccion");
-let calcular = document.getElementById("btnCalcular");
-let borrarHistorial = document.getElementById("btnBorrarHistorial");
-//let btnSeleccionarDestino = document.getElementById("btnSeleccionarDestino");
+const btnConfirmarDireccionDestino = document.getElementById("btnConfirmarDireccionDestino");
+const btnCalcular = document.getElementById("btnCalcular");
+const btnConfirmarEnvio = document.getElementById("btnConfirmarEnvio");
+const btnBorrarHistorial = document.getElementById("btnBorrarHistorial");
 
-let btnConfirmarDireccionDestino = document.getElementById("btnConfirmarDireccionDestino");
+// Campos de entrada de texto
+const direccion = document.getElementById("txtDireccion");
+const destino = document.getElementById("txtDestino");
+const alto = document.getElementById("txtAlto");
+const ancho = document.getElementById("txtAncho");
+const largo = document.getElementById("txtLargo");
+const peso = document.getElementById("txtPeso");
 
-// Campos de entrada
-let direccion = document.getElementById("txtDireccion");
-let destino = document.getElementById("txtDestino");
-let alto = document.getElementById("txtAlto");
-let ancho = document.getElementById("txtAncho");
-let largo = document.getElementById("txtLargo");
-let peso = document.getElementById("txtPeso");
+// Contenedores y secciones
+const medidasContainer = document.getElementById("medidas-container");
+const empresasRecomendadas = document.getElementById("empresasRecomendadas");
+const resultado = document.getElementById("resultado");
+const historial = document.getElementById("historial");
+const historialContainer = document.getElementById("historial-container");
 
-// Contenedor de medidas
-let medidasContainer = document.getElementById("medidas-container");
+// Elementos del modal de pago
+const modalPago = document.getElementById("modalPago");
+const closeModalPago = document.getElementById("closeModalPago");
+const formPago = document.getElementById("formPago");
+const mensajePago = document.getElementById("mensajePago");
 
-// Empresa recomendada
-let empresaEnvio = document.getElementById("empresaEnvio");
-
-// H1 de resultado
-let resultado = document.getElementById("resultado");
-
-// Div del historial
-let historial = document.getElementById("historial");
-let historialContainer = document.getElementById("historial-container");
-
-// Historial en localStorage
-let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
-
-//pago
-
-let modalPago = document.getElementById("modalPago");
-let btnPagar = document.getElementById("btnPagar");
-let closeModalPago = document.getElementById("closeModalPago");
-let formPago = document.getElementById("formPago");
-let mensajePago = document.getElementById("mensajePago");
-
-verHistorial();
-
-// Empresas de envío disponibles
 const empresasDisponibles = [
     { nombre: "DHL", limite: 20, precio: 12000 },
     { nombre: "FedEx", limite: 40, precio: 22000 },
@@ -56,178 +44,43 @@ const empresasDisponibles = [
     { nombre: "Yamato Transport", limite: 350, precio: 95000 }
 ];
 
-
-// Evento para confirmar dirección y destino
-btnConfirmarDireccionDestino.onclick = () => {
-    if (direccion.value.trim() === "" || destino.value.trim() === "") {
-        resultado.innerHTML = "⚠️ Por favor, ingrese tanto la dirección como el destino.";
-        return;
-    }
-
-    // Habilitar los campos de medidas
-    medidasContainer.disabled = false;
-    resultado.innerHTML = "✅ Dirección y destino confirmados. Ahora ingrese las medidas.";
-};
-
-
-// Evento para habilitar el botón de calcular cuando se ingresan todas las medidas
-[alto, ancho, largo, peso].forEach(input => {
-    input.addEventListener("input", () => {
-        if (alto.value && ancho.value && largo.value && peso.value) {
-            calcular.disabled = false;
-        } else {
-            calcular.disabled = true;
-        }
-    });
-});
-
-// Evento para calcular el envío
-calcular.onclick = () => {
-    if (!validarisNaN()) {
-        return;
-    }
-
-    let total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
-
-    // Buscar las empresas recomendadas
-    let empresasRecomendadas = empresasDisponibles.filter(empresa => total <= empresa.limite);
-
-    if (empresasRecomendadas.length === 0) {
-        resultado.innerHTML = "⚠️ No hay empresas disponibles para el tamaño del paquete.";
-        return;
-    }
-
-    // Mostrar las empresas recomendadas en el select
-    let selectEmpresa = document.getElementById("seleccionarEmpresa");
-    selectEmpresa.innerHTML = "<option value=''>Seleccione una empresa</option>"; // Limpiar opciones anteriores
-    empresasRecomendadas.forEach(empresa => {
-        let option = document.createElement("option");
-        option.value = empresa.nombre;
-        option.innerHTML = empresa.nombre;
-        selectEmpresa.appendChild(option);
-    });
-
-    // Habilitar el select y el botón de confirmar
-    document.getElementById("empresasRecomendadas").style.display = "block";
-    selectEmpresa.disabled = false;
-    document.getElementById("btnConfirmarEnvio").disabled = false;
-
-    // Mostrar mensaje de recomendación
-    resultado.innerHTML = "🚀 Se han encontrado empresas recomendadas. Por favor, seleccione una empresa para confirmar el envío.";
-
-};
-
-document.getElementById("seleccionarEmpresa").addEventListener("change", () => {
-    let empresaSeleccionada = document.getElementById("seleccionarEmpresa").value;
-    let total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
-    
-    // Buscar la empresa seleccionada en la lista de empresas disponibles
-    let empresaData = empresasDisponibles.find(empresa => empresa.nombre === empresaSeleccionada);
-
-    if (empresaData) {
-        let precioEstimado = empresaData.precio;
-        resultado.innerHTML = `📦 Precio estimado con <b>${empresaSeleccionada}</b>: $${precioEstimado}`;
-    }
-})
-
-// Evento de selección de empresa y confirmación de envío
-// Evento de confirmación de envío
-document.getElementById("btnConfirmarEnvio").onclick = () => {
-    let empresaSeleccionada = document.getElementById("seleccionarEmpresa").value;
-    let total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
-
-    if (!empresaSeleccionada) {
-        resultado.innerHTML = "⚠️ Por favor, seleccione una empresa para continuar.";
-        return;
-    }
-
-    // Obtener la dirección y destino
-    let direccionSeleccionada = direccion.value.trim();
-    let destinoSeleccionado = destino.value.trim();
-
-    if (!direccionSeleccionada || !destinoSeleccionado) {
-        resultado.innerHTML = "⚠️ Por favor, ingrese tanto la dirección como el destino antes de confirmar.";
-        return;
-    }
-
-    // Buscar la empresa seleccionada
-    let empresaData = empresasDisponibles.find(empresa => empresa.nombre === empresaSeleccionada);
-    let precioEstimado = empresaData ? empresaData.precio : 0;
-
-    // Mostrar la confirmación de envío
-    resultado.innerHTML = `✅ Envío confirmado con la empresa: <b>${empresaSeleccionada}</b>. Precio final: $${precioEstimado}. Se procederá con el envío.`;
-
-    // Guardar en el historial
-    let historialEnvio = {
-        direccion: direccionSeleccionada,
-        destino: destinoSeleccionado,
-        empresa: empresaSeleccionada,
-        precio: precioEstimado,
-        fecha: new Date().toLocaleString()
-    };
-
-    // Obtener historial de envíos desde el localStorage, si existe
-    let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
-    historialPrecios.push(historialEnvio);
-    localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
-
-    // Mostrar el historial actualizado
-    verHistorial();
-
-    // Limpiar los campos después de la confirmación
-    limpiarCampos();
-    document.getElementById("empresasRecomendadas").style.display = "none";  // Ocultar el contenedor de empresas recomendadas
-    document.getElementById("seleccionarEmpresa").disabled = true;  // Deshabilitar la selección
-    document.getElementById("btnConfirmarEnvio").disabled = true;  // Deshabilitar el botón
-};
-
-
-
-// Botón de aceptar la confirmación de envío
-btnAceptarConfirmacion.onclick = () => {
-    // Ocultar la ventana de confirmación de envío
-    confirmacionEnvio.style.display = "none";
-};
-
-
-// Función para limpiar los campos después del cálculo
-function limpiarCampos() {
-    [alto, ancho, largo, peso].forEach(input => input.value = "");
-    calcular.disabled = true; // Se vuelve a desactivar hasta nuevo ingreso de datos
-    direccion.value = "";
-    destino.value = "";
-}
-
-
-
-function borrarItemHistorial(index) {
-    // Eliminar el item del array
-    historialPrecios.splice(index, 1);
-
-    // Actualizar el historial en el localStorage
-    localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
-
-    // Volver a mostrar el historial actualizado
-    verHistorial();
-}
-
-
-// Validar que los valores sean numéricos
-function validarisNaN() {
-    let valores = [alto.value, ancho.value, largo.value, peso.value];
-    for (let val of valores) {
-        if (isNaN(val) || val.trim() === "" || parseFloat(val) < 0) {
-            resultado.innerHTML = "⚠️ Ingrese solo números positivos en los campos de medidas.";
+function validarMedidas() {
+    const medidas = [alto, ancho, largo, peso];
+    for (const input of medidas) {
+        const value = parseFloat(input.value);
+        if (isNaN(value) || value <= 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Medida inválida',
+                text: `${input.previousElementSibling.textContent} debe ser un número positivo.`,
+            });
             return false;
         }
     }
     return true;
 }
 
-// Mostrar historial de envíos
+/**
+ * Limpia todos los campos del formulario después de confirmar un envío.
+ */
+function limpiarCampos() {
+    direccion.value = "";
+    destino.value = "";
+    alto.value = "";
+    ancho.value = "";
+    largo.value = "";
+    peso.value = "";
+    btnCalcular.disabled = true;
+    document.getElementById("seleccionarEmpresa").innerHTML = '<option value="">Seleccione una empresa</option>';
+    empresasRecomendadas.style.display = "none";
+}
 
+/**
+ * Muestra el historial de envíos almacenado en localStorage.
+ */
 function verHistorial() {
-    let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+    const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+    historial.innerHTML = "";
 
     if (historialPrecios.length === 0) {
         historialContainer.style.display = "none";
@@ -235,94 +88,248 @@ function verHistorial() {
     }
 
     historialContainer.style.display = "block";
-    historial.innerHTML = "<h2>📦 Historial de Cálculos</h2>";
+    historial.innerHTML = "<h2>📦 Historial de Envíos</h2>";
 
     historialPrecios.forEach((item, index) => {
-        let div = document.createElement("div");
-        div.classList.add("historial-item");
+        const div = document.createElement("div");
+        div.className = "historial-item";
         div.innerHTML = `
-            📍 <b>Dirección:</b> ${item.direccion} <br>
-            🏠 <b>Destino:</b> ${item.destino} <br>
-            🚛 <b>Empresa:</b> ${item.empresa} <br>
-            📅 <b>Fecha:</b> ${item.fecha} <br>
-            💰 <b>Precio:</b> $${item.precio} <br>
+            <p><b>Dirección:</b> ${item.direccion}</p>
+            <p><b>Destino:</b> ${item.destino}</p>
+            <p><b>Empresa:</b> ${item.empresa}</p>
+            <p><b>Precio:</b> $${item.precio}</p>
+            <p><b>Fecha:</b> ${item.fecha}</p>
             <button class="eliminar-item" data-index="${index}">❌ Eliminar</button>
             <button class="pagar-item" data-index="${index}">💳 Pagar</button>
         `;
-
         historial.appendChild(div);
     });
+}
 
-    // eliminar
-    document.querySelectorAll(".eliminar-item").forEach(boton => {
-        boton.addEventListener("click", (e) => {
-            let index = e.target.getAttribute("data-index");
-            borrarItemHistorial(index);
-        });
-    });
+function realizarPago() {
+    const index = document.getElementById("montoPago").dataset.index;
+    const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+    
+    if (!historialPrecios[index]) {
+        Swal.fire("Error", "No se encontró el envío seleccionado", "error");
+        return;
+    }
 
-    //pagar
-
-    document.querySelectorAll(".pagar-item").forEach(boton => {
-        boton.addEventListener("click", (e) => {
-            let index = e.target.getAttribute("data-index");
-            abrirModalPago(index);
-        });
+    const item = historialPrecios[index];
+    
+    Swal.fire({
+        title: `¿Confirmar pago de $${item.precio}?`,
+        text: `Empresa: ${item.empresa}`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4CAF50',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, pagar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Aquí iría la lógica real de pago (simulada)
+            Swal.fire(
+                '¡Pago exitoso!',
+                `Se procesó el pago de $${item.precio} a ${item.empresa}`,
+                'success'
+            );
+            
+            // Cerrar modal
+            modalPago.style.display = "none";
+            
+            // Actualizar interfaz si es necesario
+            document.querySelector(`.pagar-item[data-index="${index}"]`).textContent = "✅ Pagado";
+            document.querySelector(`.pagar-item[data-index="${index}"]`).disabled = true;
+        }
     });
 }
 
-// Eliminar un item del historial
-function borrarItemHistorial(index) {
-    let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
-    historialPrecios.splice(index, 1);  // Eliminar el item en el índice especificado
+formPago.addEventListener("submit", function(e) {
+    e.preventDefault();
+    realizarPago();
+});
+
+btnConfirmarDireccionDestino.addEventListener("click", () => {
+    if (!direccion.value.trim() || !destino.value.trim()) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Campos vacíos',
+            text: 'Por favor ingrese dirección y destino.',
+        });
+        return;
+    }
+
+    // Habilitar campos de medidas
+    const medidasInputs = medidasContainer.querySelectorAll("input");
+    medidasInputs.forEach(input => input.disabled = false);
+
+    Swal.fire({
+        icon: 'success',
+        title: '¡Dirección confirmada!',
+        text: 'Ahora ingrese las medidas del paquete.',
+    });
+});
+
+[alto, ancho, largo, peso].forEach(input => {
+    input.addEventListener("input", () => {
+        btnCalcular.disabled = !(alto.value && ancho.value && largo.value && peso.value);
+    });
+});
+
+
+btnCalcular.addEventListener("click", function() {
+    if (!validarMedidas()) return;
+
+    const total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
+    
+    const empresasFiltradas = empresasDisponibles.filter(empresa => total <= empresa.limite);
+
+    if (empresasFiltradas.length === 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'No hay empresas disponibles',
+            text: 'El paquete excede los límites de todas las empresas.',
+        });
+        return;
+    }
+
+    const selectEmpresa = document.getElementById("seleccionarEmpresa");
+    selectEmpresa.innerHTML = '<option value="">Seleccione una empresa</option>';
+    
+    empresasFiltradas.forEach(empresa => {
+        const option = document.createElement("option");
+        option.value = empresa.nombre;
+        option.textContent = `${empresa.nombre} ($${empresa.precio})`;
+        selectEmpresa.appendChild(option);
+    });
+
+    document.getElementById("empresasRecomendadas").style.display = "block";
+    selectEmpresa.disabled = false;
+    btnConfirmarEnvio.disabled = false;
+
+
+    Swal.fire({
+        icon: 'success',
+        title: '¡Empresas encontradas!',
+        html: `Se encontraron <b>${empresasFiltradas.length}</b> opciones.`,
+    });
+});
+
+btnConfirmarEnvio.addEventListener("click", () => {
+    const empresaSeleccionada = document.getElementById("seleccionarEmpresa").value;
+    if (!empresaSeleccionada) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Empresa no seleccionada',
+            text: 'Por favor elija una empresa de envío.',
+        });
+        return;
+    }
+
+    const empresaData = empresasDisponibles.find(empresa => empresa.nombre === empresaSeleccionada);
+    const precioEstimado = empresaData.precio;
+
+    const historialEnvio = {
+        direccion: direccion.value.trim(),
+        destino: destino.value.trim(),
+        empresa: empresaSeleccionada,
+        precio: precioEstimado,
+        fecha: new Date().toLocaleString()
+    };
+
+    const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+    historialPrecios.push(historialEnvio);
     localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
 
-    // Mostrar el historial actualizado
+    Swal.fire({
+        icon: 'success',
+        title: '¡Envío confirmado!',
+        html: `Empresa: <b>${empresaSeleccionada}</b><br>Precio: <b>$${precioEstimado}</b>`,
+    });
+
+    // Limpiar formulario
+    limpiarCampos();
+    verHistorial();
+});
+
+
+btnBorrarHistorial.addEventListener("click", () => {
+    Swal.fire({
+        title: '¿Borrar todo el historial?',
+        text: '¡Esta acción no se puede deshacer!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, borrar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            localStorage.removeItem("historialPrecios");
+            verHistorial();
+            Swal.fire('¡Borrado!', 'El historial ha sido eliminado.', 'success');
+        }
+    });
+});
+
+historial.addEventListener("click", (e) => {
+    if (e.target.classList.contains("eliminar-item")) {
+        const index = e.target.getAttribute("data-index");
+        borrarItemHistorial(index);
+    }
+    if (e.target.classList.contains("pagar-item")) {
+        const index = e.target.getAttribute("data-index");
+        abrirModalPago(index);
+    }
+});
+
+
+function borrarItemHistorial(index) {
+    const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios"));
+    historialPrecios.splice(index, 1);
+    localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
     verHistorial();
 }
-
-
-// Botón para borrar historial
-borrarHistorial.onclick = () => {
-    historialPrecios = [];
-    localStorage.removeItem("historialPrecios");
-    verHistorial();
-};
 
 function abrirModalPago(index) {
-    // Obtener el historial de envíos
-    let historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
-    let item = historialPrecios[index];
-
-    // Rellenar el monto en el modal
+    const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+    const item = historialPrecios[index];
+    
+    // Guardar el índice del ítem que se está pagando
+    document.getElementById("montoPago").dataset.index = index;
     document.getElementById("montoPago").value = item.precio;
-
-    // Mostrar el modal de pago
+    
+    // Remover clase 'active' de todos los botones primero
+    document.querySelectorAll(".pagar-item").forEach(btn => {
+        btn.classList.remove("active");
+    });
+    
+    // Marcar el botón clickeado como activo
+    event.target.classList.add("active");
+    
     modalPago.style.display = "block";
+}
 
-    // Cerrar el modal cuando se haga clic en la "X"
-    closeModalPago.onclick = () => {
+
+closeModalPago.addEventListener("click", () => {
+    modalPago.style.display = "none";
+});
+
+formPago.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const itemIndex = document.querySelector(".pagar-item.active")?.dataset.index;
+    if (itemIndex === undefined) return;
+
+    const item = JSON.parse(localStorage.getItem("historialPrecios"))[itemIndex];
+    
+    Swal.fire({
+        icon: 'success',
+        title: '¡Pago exitoso!',
+        html: `Se ha procesado el pago de <b>$${item.precio}</b> a <b>${item.empresa}</b>.`,
+    }).then(() => {
         modalPago.style.display = "none";
-    };
+    });
+});
 
-    // Evitar que el modal se cierre al hacer clic dentro del contenedor
-    window.onclick = (event) => {
-        if (event.target === modalPago) {
-            modalPago.style.display = "none";
-        }
-    };
-
-    // Manejar el envío del formulario de pago
-    formPago.onsubmit = (e) => {
-        e.preventDefault();
-        realizarPago(item);
-    };
-}
-
-function realizarPago(item) {
-    // Aquí puedes agregar la lógica de pago, como redirigir a un servicio de pago
-    mensajePago.textContent = `¡Pago de $${item.precio} realizado exitosamente!`;
-    setTimeout(() => {
-        modalPago.style.display = "none";  // Cerrar el modal después de pagar
-    }, 2000);
-}
+document.addEventListener("DOMContentLoaded", () => {
+    verHistorial();
+});

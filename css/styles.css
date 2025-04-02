@@ -3,26 +3,43 @@ body {
     font-family: 'Roboto', sans-serif;
     background-color: #f4f7fc;
     margin: 0;
-    padding: 0;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: 100vh;
 }
 
-
-h1 {
+h1, h2, h3 {
     color: #333;
     text-align: center;
+    font-family: 'Poppins', sans-serif;
 }
 
 
-input[type="text"] {
+input[type="text"],
+input[type="number"],
+select {
     padding: 10px;
-    margin: 5px 0;
+    margin: 8px 0;
     width: 250px;
     border: 2px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
+    transition: border 0.3s;
+}
+
+input:focus, select:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+fieldset {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+    background: white;
 }
 
 
@@ -30,234 +47,180 @@ button {
     background-color: #4CAF50;
     color: white;
     border: none;
-    padding: 15px 32px;
+    padding: 12px 24px;
     text-align: center;
-    text-decoration: none;
-    display: inline-block;
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
-    margin: 10px 0;
+    margin: 10px 5px;
+    transition: background 0.3s;
+    font-family: 'Poppins', sans-serif;
 }
 
 button:hover {
     background-color: #45a049;
 }
 
-
-#resultado {
-    font-size: 18px;
-    color: #4CAF50;
-    font-weight: bold;
-    margin-top: 20px;
-}
-
-#historial-container {
-    display: none; 
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    width: 300px; 
-    text-align: center; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-#historial p {
-    font-family: 'Poppins', sans-serif; 
-    font-size: 16px; 
-    color: #333; 
-    line-height: 1.5; 
-    margin: 8px 0; 
-}
-
-
-#historial h2 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 20px;
-    color: #333;
-    text-align: center;
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
 }
 
 
 #btnBorrarHistorial {
     background-color: #f44336;
-    color: white;
-    padding: 12px 30px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
 }
 
 #btnBorrarHistorial:hover {
     background-color: #e53935;
 }
 
-#confirmacionEnvio {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 20px;
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+.eliminar-item {
+    background-color: #f44336;
+    padding: 8px 15px;
+    margin-right: 5px;
 }
 
-#btnAceptarConfirmacion {
-    background-color: white;
+.eliminar-item:hover {
+    background-color: #d32f2f;
+}
+
+.pagar-item {
+    background-color: #2196F3;
+    padding: 8px 15px;
+}
+
+.pagar-item:hover {
+    background-color: #1976D2;
+}
+
+.editar-item {
+    background-color: #FF9800;
+    margin-left: 5px;
+}
+
+.editar-item:hover {
+    background-color: #F57C00;
+}
+
+#resultado {
+    font-size: 18px;
     color: #4CAF50;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-top: 10px;
-}
-
-#btnAceptarConfirmacion:hover {
-    background-color: #45a049;
-}
-
-#empresasRecomendadas {
-    margin-top: 20px;
-}
-
-#seleccionarEmpresa {
+    font-weight: bold;
+    margin: 20px 0;
     padding: 10px;
-    font-size: 16px;
-}
-
-#btnConfirmarEnvio {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
     border-radius: 5px;
-    margin-top: 10px;
+    text-align: center;
 }
 
-#btnConfirmarEnvio:hover {
-    background-color: #45a049;
+#historial-container {
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-top: 20px;
 }
 
 .historial-item {
     background-color: #f9f9f9;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 8px;
+    border-left: 4px solid #4CAF50;
+    position: relative;
 }
 
-.eliminar-item {
-    background-color: red;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 14px;
-    margin-top: 5px;
+.historial-item p {
+    margin: 5px 0;
+    font-size: 15px;
+    color: #555;
 }
 
-.eliminar-item:hover {
-    background-color: darkred;
+.historial-item b {
+    color: #333;
 }
 
-
-.pagar-item {
-    background-color: green;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 14px;
-    margin-top: 5px;
-}
-
-.pagar-item:hover {
-    background-color: darkgreen;
-}
-
-#precio-estimado {
-    margin-top: 10px;
-    font-size: 18px;
-    color: #4CAF50;
-}
-
-#precio-estimado b {
-    color: #FF5722;
-}
-.editar-item {
-    margin-left: 10px;
-    background-color: #FF9800;
-    color: white;
-    border: none;
-    padding: 5px;
-    cursor: pointer;
-    border-radius: 3px;
-}
-
-.editar-item:hover {
-    background-color: #FF5722;
-}
-
-#btnConfirmarEdicion {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-#btnConfirmarEdicion:hover {
-    background-color: #45a049;
-}
-
-
-/* Estilo para el modal */
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
-    background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.4);
-    padding-top: 60px;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(3px);
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
+    margin: 10% auto;
+    padding: 25px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
 }
 
 .close {
     color: #aaa;
-    float: right;
+    position: absolute;
+    top: 15px;
+    right: 25px;
     font-size: 28px;
     font-weight: bold;
+    cursor: pointer;
 }
 
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
+.close:hover {
+    color: #333;
+}
+
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="number"],
+    select {
+        width: 100%;
+    }
+    
+    button {
+        width: 100%;
+        margin: 8px 0;
+    }
+    
+    .historial-item {
+        padding: 10px;
+    }
+}
+
+.swal2-popup {
+    font-family: 'Roboto', sans-serif;
+    border-radius: 10px !important;
+}
+
+.swal2-confirm {
+    background-color: #4CAF50 !important;
+}
+
+.swal2-cancel {
+    background-color: #f44336 !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.active {
+    box-shadow: 0 0 0 2px gold;
 }

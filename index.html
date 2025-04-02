@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script defer src="./js/main.js"></script>
+    <title>Cotizador de Envíos</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="./css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-    <title>Correos</title>
 </head>
 <body>
-
     <h1>Cotizador de Envíos</h1>
 
-    <!-- SELECCIÓN DE DIRECCIÓN -->
     <h2>Seleccione su dirección:</h2>
     <h3>Ej: (Calle 123, Madrid, España)</h3>
     <input type="text" id="txtDireccion" placeholder="Ingrese su dirección">
@@ -20,46 +18,33 @@
     <input type="text" id="txtDestino" placeholder="Ingrese el destino">
     <button id="btnConfirmarDireccionDestino">Confirmar Dirección y Destino</button>
 
-    <!-- INGRESO DE MEDIDAS (DESHABILITADO HASTA SELECCIONAR DIRECCIÓN) -->
-    <fieldset id="medidas-container" disabled>
+    <fieldset id="medidas-container">
         <h2>Ingrese las dimensiones del paquete:</h2>
-        <label>Alto:</label>
-        <input type="text" id="txtAlto">
-        <label>Ancho:</label>
-        <input type="text" id="txtAncho">
-        <label>Largo:</label>
-        <input type="text" id="txtLargo">
-        <label>Peso:</label>
-        <input type="text" id="txtPeso">
+        <label>Alto (cm):</label>
+        <input type="number" id="txtAlto" placeholder="Ej: 10" disabled>
+        <label>Ancho (cm):</label>
+        <input type="number" id="txtAncho" placeholder="Ej: 20" disabled>
+        <label>Largo (cm):</label>
+        <input type="number" id="txtLargo" placeholder="Ej: 30" disabled>
+        <label>Peso (kg):</label>
+        <input type="number" id="txtPeso" placeholder="Ej: 2" disabled>
         <button id="btnCalcular" disabled>Calcular Envío</button>
     </fieldset>
 
-
-    <!-- Empresas recomendadas (oculto al principio) -->
     <div id="empresasRecomendadas" style="display:none;">
-    <h2>Seleccione una empresa de envío:</h2>
-    <select id="seleccionarEmpresa" disabled>
-        <option value="">Seleccione una empresa</option>
-    </select>
-    <button id="btnConfirmarEnvio" disabled>Confirmar Envío</button>
+        <h2>Seleccione una empresa de envío:</h2>
+        <select id="seleccionarEmpresa" disabled>
+            <option value="">Seleccione una empresa</option>
+        </select>
+        <button id="btnConfirmarEnvio" disabled>Confirmar Envío</button>
     </div>
 
-    <!-- RESULTADO DEL CÁLCULO -->
     <h1 id="resultado"></h1>
 
-    <!-- HISTORIAL DE CÁLCULOS -->
     <div id="historial-container" style="display:none;">
         <div id="historial"></div>
         <button id="btnBorrarHistorial">Borrar Historial</button>
     </div>
-
-    <!-- Ventana de Confirmación de Envío -->
-    <div id="confirmacionEnvio" style="display:none;">
-    <h2>¡Envío Confirmado!</h2>
-    <p>El paquete ha sido registrado correctamente. El envío se está procesando.</p>
-    <button id="btnAceptarConfirmacion">Aceptar</button>
-    </div>
-
 
     <div id="modalPago" class="modal">
         <div class="modal-content">
@@ -74,6 +59,6 @@
         </div>
     </div>
 
-
+    <script defer src="./js/main.js"></script>
 </body>
 </html>
