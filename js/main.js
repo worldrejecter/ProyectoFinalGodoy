@@ -1,14 +1,11 @@
-// =============================================
-// === ELEMENTOS DEL DOM (INTERFAZ DE USUARIO) ===
-// =============================================
 
-// Botones
+// Elementos del DOM
 const btnConfirmarDireccionDestino = document.getElementById("btnConfirmarDireccionDestino");
 const btnCalcular = document.getElementById("btnCalcular");
 const btnConfirmarEnvio = document.getElementById("btnConfirmarEnvio");
 const btnBorrarHistorial = document.getElementById("btnBorrarHistorial");
 
-// Campos de entrada de texto
+// Campos de entrada
 const direccion = document.getElementById("txtDireccion");
 const destino = document.getElementById("txtDestino");
 const alto = document.getElementById("txtAlto");
@@ -16,21 +13,39 @@ const ancho = document.getElementById("txtAncho");
 const largo = document.getElementById("txtLargo");
 const peso = document.getElementById("txtPeso");
 
-// Contenedores y secciones
+// Contenedores
 const medidasContainer = document.getElementById("medidas-container");
 const empresasRecomendadas = document.getElementById("empresasRecomendadas");
 const resultado = document.getElementById("resultado");
 const historial = document.getElementById("historial");
 const historialContainer = document.getElementById("historial-container");
 
-// Elementos del modal de pago
-const modalPago = document.getElementById("modalPago");
-const closeModalPago = document.getElementById("closeModalPago");
-const formPago = document.getElementById("formPago");
-const mensajePago = document.getElementById("mensajePago");
-
+// Datos
 let empresasDisponibles = [];
 
+
+// Función para cargar empresas desde JSON
+async function cargarEmpresas() {
+    try {
+        const response = await fetch('./data/empresas.json');
+        if (!response.ok) throw new Error("Error al cargar empresas");
+        empresasDisponibles = await response.json();
+    } catch (error) {
+        console.error("Error:", error);
+        // Datos de respaldo
+        empresasDisponibles = [
+            { nombre: "DHL", limite: 20, precio: 12000 },
+            { nombre: "FedEx", limite: 40, precio: 22000 }
+        ];
+        Swal.fire({
+            icon: 'warning',
+            title: 'Modo offline activado',
+            text: 'Usando datos de respaldo'
+        });
+    }
+}
+
+// Validación de medidas
 function validarMedidas() {
     const medidas = [alto, ancho, largo, peso];
     for (const input of medidas) {
@@ -47,33 +62,7 @@ function validarMedidas() {
     return true;
 }
 
-async function cargarEmpresas() {
-    try {
-      const response = await fetch('./data/empresas.json');
-      if (!response.ok) throw new Error("Error al cargar empresas");
-      empresasDisponibles = await response.json();
-      console.log("Empresas cargadas:", empresasDisponibles);
-    } catch (error) {
-      console.error("Error:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error crítico',
-        text: 'No se pudieron cargar las empresas de envío'
-      });
-      // Datos de respaldo
-      empresasDisponibles = [
-        { nombre: "DHL", limite: 20, precio: 12000 },
-        { nombre: "FedEx", limite: 40, precio: 22000 }
-      ];
-    }
-  }
-  
-  // Llama a esta función al inicio:
-  document.addEventListener("DOMContentLoaded", () => {
-    cargarEmpresas();
-    verHistorial();
-  });
-
+// Limpiar formulario
 function limpiarCampos() {
     direccion.value = "";
     destino.value = "";
@@ -84,11 +73,14 @@ function limpiarCampos() {
     btnCalcular.disabled = true;
     document.getElementById("seleccionarEmpresa").innerHTML = '<option value="">Seleccione una empresa</option>';
     empresasRecomendadas.style.display = "none";
+    
+    // Resetear botón de confirmación
+    btnConfirmarDireccionDestino.disabled = false;
+    btnConfirmarDireccionDestino.style.opacity = "1";
+    btnConfirmarDireccionDestino.textContent = "Confirmar Dirección y Destino";
 }
 
-/**
- * Muestra el historial de envíos almacenado en localStorage.
- */
+// Mostrar historial
 function verHistorial() {
     const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
     historial.innerHTML = "";
@@ -111,95 +103,155 @@ function verHistorial() {
             <p><b>Precio:</b> $${item.precio}</p>
             <p><b>Fecha:</b> ${item.fecha}</p>
             <button class="eliminar-item" data-index="${index}">❌ Eliminar</button>
-            <button class="pagar-item" data-index="${index}">💳 Pagar</button>
+            <button class="pagar-item" data-index="${index}">💳 ${item.pagado ? '✅ Pagado' : 'Pagar'}</button>
         `;
         historial.appendChild(div);
     });
 }
 
-function realizarPago() {
-    const index = document.getElementById("montoPago").dataset.index;
+// Función para manejar pagos
+function manejarPago(index) {
     const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
-    
-    if (!historialPrecios[index]) {
-        Swal.fire("Error", "No se encontró el envío seleccionado", "error");
-        return;
-    }
-
     const item = historialPrecios[index];
     
+    if (!item) return;
+
+    // Datos de prueba
+    const datosPrueba = {
+        tarjeta: '4242 4242 4242 4242',
+        fecha: '12/25',
+        cvv: '123',
+        nombre: 'TITULAR DE PRUEBA'
+    };
+
     Swal.fire({
-        title: `¿Confirmar pago de $${item.precio}?`,
-        text: `Empresa: ${item.empresa}`,
-        icon: 'question',
+        title: 'Procesar Pago',
+        html: `
+            <div style="text-align: left; margin: 15px 0;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p><b>Destino:</b> ${item.destino}</p>
+                    <p><b>Empresa:</b> ${item.empresa}</p>
+                    <p><b>Total a pagar:</b> $${item.precio}</p>
+                </div>
+                
+                <div class="formulario-pago">
+                    <input value="${datosPrueba.nombre}" class="swal2-input" placeholder="Nombre" id="nombre-tarjeta">
+                    <input value="${datosPrueba.tarjeta}" class="swal2-input" placeholder="Tarjeta" id="numero-tarjeta">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input value="${datosPrueba.fecha}" class="swal2-input" placeholder="MM/AA" id="fecha-tarjeta">
+                        <input value="${datosPrueba.cvv}" class="swal2-input" placeholder="CVV" id="cvv-tarjeta" type="password">
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px; font-size: 12px; color: #6c757d;">
+                    <p>💡 <b>Datos de prueba:</b> Puedes modificarlos o usar los predefinidos</p>
+                </div>
+            </div>
+        `,
         showCancelButton: true,
-        confirmButtonColor: '#4CAF50',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, pagar'
+        confirmButtonText: 'Confirmar Pago',
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+            return {
+                nombre: document.getElementById('nombre-tarjeta').value,
+                tarjeta: document.getElementById('numero-tarjeta').value,
+                fecha: document.getElementById('fecha-tarjeta').value,
+                cvv: document.getElementById('cvv-tarjeta').value
+            }
+        }
     }).then((result) => {
         if (result.isConfirmed) {
-            // Aquí iría la lógica real de pago (simulada)
-            Swal.fire(
-                '¡Pago exitoso!',
-                `Se procesó el pago de $${item.precio} a ${item.empresa}`,
-                'success'
-            );
-            
-            // Cerrar modal
-            modalPago.style.display = "none";
-            
-            // Actualizar interfaz si es necesario
-            document.querySelector(`.pagar-item[data-index="${index}"]`).textContent = "✅ Pagado";
-            document.querySelector(`.pagar-item[data-index="${index}"]`).disabled = true;
+            Swal.fire({
+                title: 'Procesando pago...',
+                timer: 1500,
+                timerProgressBar: true,
+                didOpen: () => Swal.showLoading()
+            }).then(() => {
+                // Marcar como pagado
+                item.pagado = true;
+                localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
+                verHistorial();
+                
+                Swal.fire(
+                    '¡Pago exitoso!',
+                    `$${item.precio} pagados a ${item.empresa}<br><small>ID: TRX-${Math.random().toString(36).substring(2, 10).toUpperCase()}</small>`,
+                    'success'
+                );
+            });
         }
     });
 }
 
-formPago.addEventListener("submit", function(e) {
-    e.preventDefault();
-    realizarPago();
-});
+// Eliminar item del historial
+function borrarItemHistorial(index) {
+    Swal.fire({
+        title: '¿Eliminar este envío?',
+        text: "¡Esta acción no se puede deshacer!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+            historialPrecios.splice(index, 1);
+            localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
+            verHistorial();
+            Swal.fire('¡Eliminado!', 'El envío fue removido.', 'success');
+        }
+    });
+}
 
-btnConfirmarDireccionDestino.addEventListener("click", () => {
-    if (!direccion.value.trim() || !destino.value.trim()) {
+
+// Confirmar dirección y destino
+btnConfirmarDireccionDestino.addEventListener("click", function() {
+    if (direccion.value.trim() === "" || destino.value.trim() === "") {
         Swal.fire({
             icon: 'error',
-            title: 'Campos vacíos',
-            text: 'Por favor ingrese dirección y destino.',
+            title: 'Campos incompletos',
+            text: 'Debes ingresar dirección y destino',
+            confirmButtonColor: '#3085d6'
         });
         return;
     }
 
-    // Habilitar campos de medidas
-    const medidasInputs = medidasContainer.querySelectorAll("input");
-    medidasInputs.forEach(input => input.disabled = false);
+    // Habilitar sección de medidas
+    const medidasElements = medidasContainer.querySelectorAll("input, button");
+    medidasElements.forEach(el => el.disabled = false);
+    medidasContainer.disabled = false;
+
+    // Deshabilitar este botón
+    this.disabled = true;
+    this.style.opacity = "0.7";
+    this.textContent = "✓ Confirmado";
 
     Swal.fire({
         icon: 'success',
-        title: '¡Dirección confirmada!',
-        text: 'Ahora ingrese las medidas del paquete.',
+        title: '¡Ubicaciones confirmadas!',
+        html: `
+            <div style="text-align: left;">
+                <p><b>Origen:</b> ${direccion.value.trim()}</p>
+                <p><b>Destino:</b> ${destino.value.trim()}</p>
+            </div>
+        `,
+        confirmButtonColor: '#4CAF50'
     });
 });
 
-[alto, ancho, largo, peso].forEach(input => {
-    input.addEventListener("input", () => {
-        btnCalcular.disabled = !(alto.value && ancho.value && largo.value && peso.value);
-    });
-});
-
-
+// Calcular envío
 btnCalcular.addEventListener("click", function() {
     if (!validarMedidas()) return;
 
     const total = parseFloat(alto.value) + parseFloat(ancho.value) + parseFloat(largo.value) + parseFloat(peso.value);
-    
     const empresasFiltradas = empresasDisponibles.filter(empresa => total <= empresa.limite);
 
     if (empresasFiltradas.length === 0) {
         Swal.fire({
             icon: 'error',
             title: 'No hay empresas disponibles',
-            text: 'El paquete excede los límites de todas las empresas.',
+            text: 'El paquete excede los límites de transporte',
+            confirmButtonColor: '#3085d6'
         });
         return;
     }
@@ -210,159 +262,103 @@ btnCalcular.addEventListener("click", function() {
     empresasFiltradas.forEach(empresa => {
         const option = document.createElement("option");
         option.value = empresa.nombre;
-        option.textContent = `${empresa.nombre} ($${empresa.precio})`;
+        option.textContent = `${empresa.nombre} - $${empresa.precio}`;
         selectEmpresa.appendChild(option);
     });
 
-    document.getElementById("empresasRecomendadas").style.display = "block";
+    empresasRecomendadas.style.display = "block";
     selectEmpresa.disabled = false;
     btnConfirmarEnvio.disabled = false;
 
-
     Swal.fire({
         icon: 'success',
-        title: '¡Empresas encontradas!',
-        html: `Se encontraron <b>${empresasFiltradas.length}</b> opciones.`,
+        title: `¡${empresasFiltradas.length} empresas disponibles!`,
+        text: 'Selecciona una para continuar',
+        confirmButtonColor: '#4CAF50'
     });
 });
 
-btnConfirmarEnvio.addEventListener("click", () => {
+
+btnConfirmarEnvio.addEventListener("click", function() {
     const empresaSeleccionada = document.getElementById("seleccionarEmpresa").value;
     if (!empresaSeleccionada) {
         Swal.fire({
             icon: 'error',
             title: 'Empresa no seleccionada',
-            text: 'Por favor elija una empresa de envío.',
+            text: 'Debes elegir una empresa de transporte',
+            confirmButtonColor: '#3085d6'
         });
         return;
     }
 
-    const empresaData = empresasDisponibles.find(empresa => empresa.nombre === empresaSeleccionada);
-    const precioEstimado = empresaData.precio;
-
-    const historialEnvio = {
+    const empresa = empresasDisponibles.find(e => e.nombre === empresaSeleccionada);
+    const nuevoEnvio = {
         direccion: direccion.value.trim(),
         destino: destino.value.trim(),
         empresa: empresaSeleccionada,
-        precio: precioEstimado,
-        fecha: new Date().toLocaleString()
+        precio: empresa.precio,
+        fecha: new Date().toLocaleString(),
+        pagado: false
     };
 
-    const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
-    historialPrecios.push(historialEnvio);
-    localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
+    const historial = JSON.parse(localStorage.getItem("historialPrecios")) || [];
+    historial.push(nuevoEnvio);
+    localStorage.setItem("historialPrecios", JSON.stringify(historial));
 
     Swal.fire({
         icon: 'success',
-        title: '¡Envío confirmado!',
-        html: `Empresa: <b>${empresaSeleccionada}</b><br>Precio: <b>$${precioEstimado}</b>`,
+        title: '¡Envío registrado!',
+        html: `
+            <div style="text-align: left;">
+                <p><b>Empresa:</b> ${empresaSeleccionada}</p>
+                <p><b>Precio:</b> $${empresa.precio}</p>
+            </div>
+        `,
+        confirmButtonColor: '#4CAF50'
     });
 
-    // Limpiar formulario
     limpiarCampos();
     verHistorial();
 });
 
 
-btnBorrarHistorial.addEventListener("click", () => {
+btnBorrarHistorial.addEventListener("click", function() {
     Swal.fire({
         title: '¿Borrar todo el historial?',
-        text: '¡Esta acción no se puede deshacer!',
+        text: "¡Perderás todos los envíos registrados!",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sí, borrar'
+        confirmButtonText: 'Sí, borrar todo'
     }).then((result) => {
         if (result.isConfirmed) {
             localStorage.removeItem("historialPrecios");
             verHistorial();
-            Swal.fire('¡Borrado!', 'El historial ha sido eliminado.', 'success');
+            Swal.fire('¡Historial borrado!', '', 'success');
         }
     });
 });
 
-historial.addEventListener("click", (e) => {
+
+historial.addEventListener("click", function(e) {
     if (e.target.classList.contains("eliminar-item")) {
-        const index = e.target.getAttribute("data-index");
-        borrarItemHistorial(index);
+        borrarItemHistorial(e.target.dataset.index);
     }
-    if (e.target.classList.contains("pagar-item")) {
-        const index = e.target.getAttribute("data-index");
-        abrirModalPago(index);
+    if (e.target.classList.contains("pagar-item") && !e.target.textContent.includes("Pagado")) {
+        manejarPago(e.target.dataset.index);
     }
 });
 
 
-function borrarItemHistorial(index) {
-    Swal.fire({
-        title: '¿Estás seguro?',
-        text: "¡No podrás revertir esta acción!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
-            const itemEliminado = historialPrecios[index]; // Guardamos referencia para el mensaje
-            
-            historialPrecios.splice(index, 1);
-            localStorage.setItem("historialPrecios", JSON.stringify(historialPrecios));
-            
-            verHistorial(); // Actualizamos la vista
-            
-            Swal.fire(
-                '¡Eliminado!',
-                `El envío a ${itemEliminado.destino} (${itemEliminado.empresa}) fue eliminado.`,
-                'success'
-            );
-        }
-    });
-}
-
-function abrirModalPago(index) {
-    const historialPrecios = JSON.parse(localStorage.getItem("historialPrecios")) || [];
-    const item = historialPrecios[index];
-    
-    // Guardar el índice del ítem que se está pagando
-    document.getElementById("montoPago").dataset.index = index;
-    document.getElementById("montoPago").value = item.precio;
-    
-    // Remover clase 'active' de todos los botones primero
-    document.querySelectorAll(".pagar-item").forEach(btn => {
-        btn.classList.remove("active");
-    });
-    
-    // Marcar el botón clickeado como activo
-    event.target.classList.add("active");
-    
-    modalPago.style.display = "block";
-}
-
-
-closeModalPago.addEventListener("click", () => {
-    modalPago.style.display = "none";
-});
-
-formPago.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const itemIndex = document.querySelector(".pagar-item.active")?.dataset.index;
-    if (itemIndex === undefined) return;
-
-    const item = JSON.parse(localStorage.getItem("historialPrecios"))[itemIndex];
-    
-    Swal.fire({
-        icon: 'success',
-        title: '¡Pago exitoso!',
-        html: `Se ha procesado el pago de <b>$${item.precio}</b> a <b>${item.empresa}</b>.`,
-    }).then(() => {
-        modalPago.style.display = "none";
+[alto, ancho, largo, peso].forEach(input => {
+    input.addEventListener("input", function() {
+        btnCalcular.disabled = !(alto.value && ancho.value && largo.value && peso.value);
     });
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+
+document.addEventListener("DOMContentLoaded", function() {
+    cargarEmpresas();
     verHistorial();
 });
